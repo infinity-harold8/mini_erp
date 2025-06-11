@@ -18,6 +18,7 @@ const CategoriesIndex = ({ categories }) => {
                         <div className="p-6 bg-white border-b border-gray-200">
                             <div className="flex justify-between mb-4">
                                 <h1 className="text-lg font-semibold">Categories List</h1>
+                                test lang namn bro
                                 <Link
                                     href="/settings_categories/create"
                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
