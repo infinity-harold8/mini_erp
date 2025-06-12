@@ -6,7 +6,7 @@ const Square = ({ onClose, order }) => {
   
     // Convert the image to Base64 when the component mounts
     useEffect(() => {
-      fetch(`storage/assets/jojoBragaisWW.png`)
+      fetch(`storage/assets/mqlogo.webp`)
         .then((response) => response.blob())
         .then((blob) => {
           const reader = new FileReader();
