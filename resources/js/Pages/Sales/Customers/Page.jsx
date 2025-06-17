@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import { Link, usePage, router } from "@inertiajs/react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import SalesLayout from "@/Layouts/SalesLayout";
+import { LinkIconCreate } from '@/Components/UI/Links';
 
 const CustomersIndex = ({ Customers }) => {
 
     return (
-        <AuthenticatedLayout
+        <SalesLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Customers
-                </h2>
+                
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Customers
+                    </h2>
+                    <LinkIconCreate
+                        href="/customers/create"
+                        name={"Customer"}
+                    />
+                </div>
             }
         >
             <div className="py-12">
@@ -20,12 +28,12 @@ const CustomersIndex = ({ Customers }) => {
                                 <h1 className="text-lg font-semibold">
                                     Customer List
                                 </h1>
-                                <Link
+                                {/* <Link
                                     href="/customers/create"
                                     className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
                                 >
                                     Create New Customer
-                                </Link>
+                                </Link> */}
                             </div>
 
                             <table className="min-w-full table-auto border-collapse border border-gray-200">
@@ -103,7 +111,7 @@ const CustomersIndex = ({ Customers }) => {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </SalesLayout>
     );
 };
 
