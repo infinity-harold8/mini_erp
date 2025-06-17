@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, usePage, router } from "@inertiajs/react";
 import FinanceLayout from '@/Layouts/FinanceLayout';
+import { LinkIconCreate } from '@/Components/UI/Links';
 
 const Finance = ({ sizes }) => {
 

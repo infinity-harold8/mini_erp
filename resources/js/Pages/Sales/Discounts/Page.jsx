@@ -1,104 +1,107 @@
 import React, { useState } from 'react';
 import { Link, usePage, router } from "@inertiajs/react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import FinanceLayout from '@/Layouts/FinanceLayout';
+import { LinkIconCreate } from '@/Components/UI/Links';
+
 
 const DiscountsIndex = ({ discounts }) => {
 
     return (
-        <AuthenticatedLayout
+        <FinanceLayout
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Discounts
-                </h2>
+                
+                <div className="flex items-center justify-between">
+                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                        Discounts
+                    </h2>
+                    <LinkIconCreate
+                        href="/discounts/create"
+                        name={"Discount"}
+                    />
+                </div>
             }
         >
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white border-b border-gray-200">
-                            <div className="flex justify-between mb-4">
-                                <h1 className="text-lg font-semibold">Discount List</h1>
-                                <Link
-                                    href="/discounts/create"
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                >
-                                    Create New Discount
-                                </Link>
-                            </div>
-
-                            <table className="min-w-full table-auto border-collapse border border-gray-200">
-                                <thead>
-                                    <tr>
-                                        <th className="border border-gray-300 px-4 py-2">#</th>
-                                        <th className="border border-gray-300 px-4 py-2">Name</th>
-                                        <th className="border border-gray-300 px-4 py-2">Type (Fixed/%)</th>
-                                        <th className="border border-gray-300 px-4 py-2">Value (Decimal)</th>
-                                        <th className="border border-gray-300 px-4 py-2">Discount For</th>
-                                        <th className="border border-gray-300 px-4 py-2">Status</th>
-                                        <th className="border border-gray-300 px-4 py-2">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {discounts?.map((discount, index) => (
-                                        <tr key={discount.id}>
-                                            <td className="border border-gray-300 px-4 py-2">
-                                                {index + 1}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2">
-                                                {discount.name}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2">
-                                                {discount.type}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2">
-                                                {discount.value}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2">
-                                                {discount.discount_for}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2">
-                                                {discount.is_active ? 'Active' : 'In-Active'}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2">
-                                                {( discount.discount_for == 'individual' || discount.discount_for == 'category' ) && (
-                                                    <Link
-                                                        href={route("discount_per_items.create", { discount_id: discount.id })}
-                                                        className="text-yellow-500 hover:underline mr-2"
-                                                    >
-                                                        Assign Item
-                                                    </Link>
-                                                )}
-                                                <Link
-                                                    href={`/discounts/${discount.id}/edit`}
-                                                    className="text-blue-500 hover:underline mr-2"
-                                                >
-                                                    Edit
-                                                </Link>
-                                                <Link
-                                                    href={`/discounts/${discount.id}`}
-                                                    method="delete"
-                                                    className="text-red-500 hover:underline"
-                                                    as="button"
-                                                    onClick={(e) => {
-                                                        e.preventDefault(); // Prevent default link behavior
-                                                        if (confirm("Are you sure you want to remove this Courier?")) {
-                                                            // Perform the deletion
-                                                            router.delete(`/discounts/${discount.id}`);
-                                                        }
-                                                    }}
-                                                >
-                                                    Delete
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <div className="p-6 bg-white border-b border-gray-200">
+                <div className="flex justify-between mb-4">
+                    <h1 className="text-lg font-semibold">Discount List</h1>
+                    {/* <Link
+                        href="/discounts/create"
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                        Create New Discount
+                    </Link> */}
                 </div>
+
+                <table className="min-w-full table-auto border-collapse border border-gray-200">
+                    <thead>
+                        <tr>
+                            <th className="border border-gray-300 px-4 py-2">#</th>
+                            <th className="border border-gray-300 px-4 py-2">Name</th>
+                            <th className="border border-gray-300 px-4 py-2">Type (Fixed/%)</th>
+                            <th className="border border-gray-300 px-4 py-2">Value (Decimal)</th>
+                            <th className="border border-gray-300 px-4 py-2">Discount For</th>
+                            <th className="border border-gray-300 px-4 py-2">Status</th>
+                            <th className="border border-gray-300 px-4 py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {discounts?.map((discount, index) => (
+                            <tr key={discount.id}>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    {index + 1}
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    {discount.name}
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    {discount.type}
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    {discount.value}
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    {discount.discount_for}
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    {discount.is_active ? 'Active' : 'In-Active'}
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    {( discount.discount_for == 'individual' || discount.discount_for == 'category' ) && (
+                                        <Link
+                                            href={route("discount_per_items.create", { discount_id: discount.id })}
+                                            className="text-yellow-500 hover:underline mr-2"
+                                        >
+                                            Assign Item
+                                        </Link>
+                                    )}
+                                    <Link
+                                        href={`/discounts/${discount.id}/edit`}
+                                        className="text-blue-500 hover:underline mr-2"
+                                    >
+                                        Edit
+                                    </Link>
+                                    <Link
+                                        href={`/discounts/${discount.id}`}
+                                        method="delete"
+                                        className="text-red-500 hover:underline"
+                                        as="button"
+                                        onClick={(e) => {
+                                            e.preventDefault(); // Prevent default link behavior
+                                            if (confirm("Are you sure you want to remove this Courier?")) {
+                                                // Perform the deletion
+                                                router.delete(`/discounts/${discount.id}`);
+                                            }
+                                        }}
+                                    >
+                                        Delete
+                                    </Link>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
-        </AuthenticatedLayout>
+        </FinanceLayout>
     );
 };
 

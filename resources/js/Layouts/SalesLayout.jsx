@@ -5,6 +5,7 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import AuthenticatedLayout from './AuthenticatedLayout';
+import SubNavigaiton from '@/Components/UI/Navigation/SubNavigation';
 import { Head } from '@inertiajs/react';
 
 export default function SalesLayout({ header, children }) {
@@ -59,18 +60,20 @@ export default function SalesLayout({ header, children }) {
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Sales
-                </h2>
+                <div className="w-full text-xl font-semibold leading-tight text-gray-800">
+                    {header || ''}
+                </div>
             }
         >
             <Head title="Sales" />
+
+            <SubNavigaiton data={paths} container_styles={''} route_styles={''} />
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            <div className="flex flex-wrap gap-3 justify-center sm:justify-start p-4">
+                            {/* <div className="flex flex-wrap gap-3 justify-center sm:justify-start p-4">
                                 {filteredPaths.map((path, i) => (
                                     <ResponsiveNavLink 
                                         href={route(`${path.route}`)}
@@ -81,7 +84,7 @@ export default function SalesLayout({ header, children }) {
                                         {path.name}
                                     </ResponsiveNavLink>
                                 ))}
-                            </div>
+                            </div> */}
                             {/* {header && (
                                 <header className="bg-white shadow">
                                     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">

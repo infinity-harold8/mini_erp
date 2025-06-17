@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import InventoryLayout from '@/Layouts/InventoryLayout';
+import { LinkIconCreate } from '@/Components/UI/Links';
 
 const ProductList = ({ products, colors, sizes, heel_heights, categories }) => {
     const { auth } = usePage().props;
@@ -42,27 +43,21 @@ const ProductList = ({ products, colors, sizes, heel_heights, categories }) => {
     }, [])
     
     return(
-        <AuthenticatedLayout
+        <InventoryLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Products Management
-                </h2>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold text-gray-900">
+                        Products
+                    </h2>
+                    <LinkIconCreate
+                        href="/inventory/products/create"
+                        name={"Create Product"}
+                    />
+                </div>
             }
         >
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-md rounded-lg">
                         <div className="p-6">
                             <div className="container mx-auto p-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h1 className="text-2xl font-bold">Products</h1>
-                                    <Link
-                                        href="/inventory/products/create"
-                                        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                                    >
-                                        Add Product
-                                    </Link>
-                                </div>
                                 <div className="col-span-3 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
                                     <select
                                         value={category || ''}
@@ -196,10 +191,7 @@ const ProductList = ({ products, colors, sizes, heel_heights, categories }) => {
                                 )}
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </AuthenticatedLayout>
+        </InventoryLayout>
     )
 };
 

@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import { Link, usePage, router } from "@inertiajs/react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import FinanceLayout from '@/Layouts/FinanceLayout';
+import { LinkIconCreate } from '@/Components/UI/Links';
 
 const DiscountPerItemsIndex = ({ discounts }) => {
 
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Discount Per Items
-                </h2>
+                
+                <div className="flex items-center justify-between">
+                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                        Discount Per Items
+                    </h2>   
+                    <LinkIconCreate
+                        href="/discount_per_items/create"
+                        name={"Discount"}
+                    />
+                </div>
             }
         >
             <div className="py-12">
@@ -18,12 +26,6 @@ const DiscountPerItemsIndex = ({ discounts }) => {
                         <div className="p-6 bg-white border-b border-gray-200">
                             <div className="flex justify-between mb-4">
                                 <h1 className="text-lg font-semibold">Discount List</h1>
-                                <Link
-                                    href="/discount_per_items/create"
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                >
-                                    Create New Discount
-                                </Link>
                             </div>
 
                             <table className="min-w-full table-auto border-collapse border border-gray-200">

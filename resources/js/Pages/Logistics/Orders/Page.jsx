@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { Link, router } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import LogisticsLayout from "@/Layouts/LogisticsLayout";
+import { LinkIconCreate } from '@/Components/UI/Links';
 
 const SalesOrderList = ({ sales_orders }) => {
     const [search, setSearch] = useState("");
@@ -77,11 +78,18 @@ const SalesOrderList = ({ sales_orders }) => {
     };
     
     return(
-        <AuthenticatedLayout
+        <LogisticsLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Sales Orders
-                </h2>
+
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Sales Orders
+                    </h2>
+                    {/* <LinkIconCreate
+                        href="/couriers/create"
+                        name={"Courier"}
+                    /> */}
+                </div>
             }
         >
             <div className="py-12">
@@ -213,7 +221,7 @@ const SalesOrderList = ({ sales_orders }) => {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </LogisticsLayout>
     )
 };
 
