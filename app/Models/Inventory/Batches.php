@@ -2,6 +2,7 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\StockTransactions;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -27,5 +28,13 @@ class Batches extends Model
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class, 'warehouse_id');
+    }
+
+    public function serialNumbers(){
+        return $this->hasMany(SerialNumbers::class, 'batch_id');
+    }
+
+    public function stockTransactions(){
+        return $this->hasMany(StockTransactions::class, 'batch_id');
     }
 }
