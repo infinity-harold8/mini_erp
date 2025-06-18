@@ -15,6 +15,7 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
     const [targetWarehouse, setTargetWarehouse] = useState('');
     const [status, setStatus] = useState('draft');
     const [generalRemarks, setGeneralRemarks] = useState('');
+    const [batchId, setBatchId] = useState('');
     const [availableVariants, setAvailableVariants] = useState(product_variants);
     const [stockLevels, setStockLevels] = useState([]);
 
@@ -25,7 +26,8 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
     // ✅ Update available product variants when transaction type or source warehouse changes
     useEffect(() => {
         // console.log(stock_levels);
-        console.log(sourceWarehouse);
+        // console.log(sourceWarehouse);
+        console.log(batches);
         if (transactionType === 'transfer' && sourceWarehouse) {
             const filteredVariants = stockLevels
                 .filter((stock) => stock.warehouse_id.toString() === sourceWarehouse.toString())
@@ -101,6 +103,7 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
             remarks: generalRemarks,
             from_warehouse_id: transactionType === 'transfer' ? sourceWarehouse : null,
             to_warehouse_id: targetWarehouse,
+            batch_id: batchId,
             products: rows.map((row) => ({
                 product_variant_id: row.id,
                 quantity: row.quantity,
@@ -129,7 +132,7 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
     };
 
     return (
-        <InventoryLayout 
+        <InventoryLayout
             header={
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-semibold text-gray-900">
@@ -137,46 +140,56 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
                     </h2>
                 </div>
             }
-        
         >
             <div className="p-6">
                 <div className="container mx-auto p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold">Stock Transactions</h1>
+                    <div className="mb-6 flex items-center justify-between">
+                        <h1 className="text-2xl font-bold">
+                            Stock Transactions
+                        </h1>
                         <div className="space-x-2">
-                            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 mt-4" onClick={handleSubmit}>Submit</button>
+                            <button
+                                type="submit"
+                                className="mt-4 rounded bg-green-500 px-4 py-2 text-white shadow hover:bg-green-600"
+                                onClick={handleSubmit}
+                            >
+                                Submit
+                            </button>
                             <button
                                 onClick={handleAddRow}
-                                className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                className="rounded bg-blue-500 px-4 py-2 text-white shadow hover:bg-blue-600"
                             >
                                 Add Row
                             </button>
                         </div>
-                        
                     </div>
 
                     {/* Select Transaction Type */}
                     <div className="mb-4">
-                        <label className="block text-gray-700 font-bold mb-2">Transaction Type:</label>
+                        <label className="mb-2 block font-bold text-gray-700">
+                            Transaction Type:
+                        </label>
                         <select
-                            className="w-full border border-gray-300 rounded px-4 py-2"
+                            className="w-full rounded border border-gray-300 px-4 py-2"
                             value={transactionType}
                             onChange={handleTransactionTypeChange}
                         >
                             <option value="purchase">Purchase</option>
-                            <option value="return">Return</option>
+                            {/* <option value="return">Return</option>
                             <option value="adjustment">Adjustment</option>
                             <option value="correction">Correction</option>
-                            <option value="repair">Repair</option>
+                            <option value="repair">Repair</option> */}
                             <option value="transfer">Transfer</option>
                         </select>
                         <InputError message={errors.transaction_type} />
                     </div>
 
                     <div className="mb-4">
-                        <label className="block text-gray-700 font-bold mb-2">General Remarks:</label>
+                        <label className="mb-2 block font-bold text-gray-700">
+                            General Remarks:
+                        </label>
                         <textarea
-                            className="w-full border border-gray-300 rounded px-4 py-2"
+                            className="w-full rounded border border-gray-300 px-4 py-2"
                             placeholder="Enter general remarks for this transaction"
                             value={generalRemarks}
                             onChange={(e) => setGeneralRemarks(e.target.value)}
@@ -184,50 +197,82 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
                         <InputError message={errors.remarks} />
                     </div>
 
-                    <div className="mb-4">
-                        <InputLabel for="batch_id" value="Select Batch" />
-                        <Select>
-                            {batches?.map((batch) => (
-                                <option key={batch.id} value={batch.id}>
-                                    {batch.name}
-                                </option>
-                            ))}
-                        </Select>
-                    </div>
+                    {
+                        transactionType === 'purchase' && <div className="mb-4">
+                            <InputLabel for="batch_id" value="Select Batch" />
+                            <Select 
+                                onChange={(e) => setBatchId(e.target.value)}
+                                className="w-full rounded border border-gray-300 px-4 py-2"
+                            >
+                                <option value="">Select Batch</option>
+                                {batches.length > 0 ? (
+                                    batches?.map((batch) => (
+                                        <option key={batch.id} value={batch.id}>
+                                            {batch.batch_number}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option value="" disabled>
+                                        No Available Batches
+                                    </option>
+                                )}
+                            </Select>
+                            <InputError message={errors.batch_id} />
+                        </div>
+                    }
+                    
 
                     {/* Warehouse Selection */}
                     {transactionType === 'transfer' ? (
                         <>
                             <div className="mb-4">
-                                <label className="block text-gray-700 font-bold mb-2">Source Warehouse:</label>
+                                <label className="mb-2 block font-bold text-gray-700">
+                                    Source Warehouse:
+                                </label>
                                 <select
-                                    className="w-full border border-gray-300 rounded px-4 py-2"
+                                    className="w-full rounded border border-gray-300 px-4 py-2"
                                     value={sourceWarehouse}
                                     onChange={(e) => {
-                                        setSourceWarehouse(e.target.value)
-                                        getStockMovements(e.target.value)
+                                        setSourceWarehouse(e.target.value);
+                                        getStockMovements(e.target.value);
                                     }}
                                 >
-                                    <option value="" disabled>Select Source Warehouse</option>
+                                    <option value="" disabled>
+                                        Select Source Warehouse
+                                    </option>
                                     {warehouses.map((warehouse) => (
-                                        <option key={warehouse.id} value={warehouse.id}>
+                                        <option
+                                            key={warehouse.id}
+                                            value={warehouse.id}
+                                        >
                                             {warehouse.name}
                                         </option>
                                     ))}
                                 </select>
-                                <InputError message={errors.from_warehouse_id} />
+                                <InputError
+                                    message={errors.from_warehouse_id}
+                                />
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-gray-700 font-bold mb-2">Target Warehouse:</label>
+                                <label className="mb-2 block font-bold text-gray-700">
+                                    Target Warehouse:
+                                </label>
                                 <select
-                                    className="w-full border border-gray-300 rounded px-4 py-2"
+                                    className="w-full rounded border border-gray-300 px-4 py-2"
                                     value={targetWarehouse}
-                                    onChange={(e) => setTargetWarehouse(e.target.value)}
+                                    onChange={(e) =>
+                                        setTargetWarehouse(e.target.value)
+                                    }
                                 >
-                                    <option value="" disabled>Select Target Warehouse</option>
+                                    <option value="" disabled>
+                                        Select Target Warehouse
+                                    </option>
                                     {warehouses.map((warehouse) => (
-                                        <option key={warehouse.id} value={warehouse.id}>
+                                        <option
+                                            key={warehouse.id}
+                                            value={warehouse.id}
+                                        >
                                             {warehouse.name}
                                         </option>
                                     ))}
@@ -237,15 +282,24 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
                         </>
                     ) : (
                         <div className="mb-4">
-                            <label className="block text-gray-700 font-bold mb-2">Warehouse:</label>
+                            <label className="mb-2 block font-bold text-gray-700">
+                                Warehouse:
+                            </label>
                             <select
-                                className="w-full border border-gray-300 rounded px-4 py-2"
+                                className="w-full rounded border border-gray-300 px-4 py-2"
                                 value={targetWarehouse}
-                                onChange={(e) => setTargetWarehouse(e.target.value)}
+                                onChange={(e) =>
+                                    setTargetWarehouse(e.target.value)
+                                }
                             >
-                                <option value="" disabled>Select Warehouse</option>
+                                <option value="" disabled>
+                                    Select Warehouse
+                                </option>
                                 {warehouses.map((warehouse) => (
-                                    <option key={warehouse.id} value={warehouse.id}>
+                                    <option
+                                        key={warehouse.id}
+                                        value={warehouse.id}
+                                    >
                                         {warehouse.name}
                                     </option>
                                 ))}
@@ -258,8 +312,19 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
                     <table className="w-full table-auto border-collapse border border-gray-300">
                         <thead>
                             <tr className="bg-gray-100">
-                                <th className="border px-4 py-2">Product SKU</th>
-                                <th className="border px-4 py-2" hidden={transactionType === 'transfer' ? false : true}>Available Stocks</th>
+                                <th className="border px-4 py-2">
+                                    Product SKU
+                                </th>
+                                <th
+                                    className="border px-4 py-2"
+                                    hidden={
+                                        transactionType === 'transfer'
+                                            ? false
+                                            : true
+                                    }
+                                >
+                                    Available Stocks
+                                </th>
                                 <th className="border px-4 py-2">Quantity</th>
                                 <th className="border px-4 py-2">Actions</th>
                             </tr>
@@ -267,9 +332,11 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
                         <tbody>
                             {rows.map((row, index) => {
                                 // ✅ Find available stock for the selected SKU in the selected source warehouse
-                                const availableStock = stockLevels.find(stock => 
-                                    stock.product_variant_id === row.id
-                                )?.total_stock || 0;
+                                const availableStock =
+                                    stockLevels.find(
+                                        (stock) =>
+                                            stock.product_variant_id === row.id,
+                                    )?.total_stock || 0;
 
                                 return (
                                     <tr key={index}>
@@ -283,28 +350,15 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
                                                         placeholder="Search SKU (Transfer)"
                                                         value={row.sku}
                                                         onChange={(e) => {
-                                                            handleInputChange(
-                                                                index,
-                                                                'sku',
-                                                                e.target.value,
-                                                            );
-                                                            toggleDropdown(
-                                                                index,
-                                                            );
+                                                            handleInputChange(index, 'sku', e.target.value);
+                                                            toggleDropdown(index);
                                                         }}
                                                         onFocus={() =>
-                                                            toggleDropdown(
-                                                                index,
-                                                            )
+                                                            toggleDropdown(index)
                                                         }
                                                     />
-                                                    <InputError
-                                                        message={
-                                                            errors.products
-                                                                .index
-                                                                .product_variant_id
-                                                        }
-                                                    />
+                                                    <InputError message={errors?.[`products.${index}.product_variant_id`]} />
+
                                                 </>
                                             ) : (
                                                 <>
@@ -314,86 +368,62 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
                                                         placeholder="Search SKU (Purchase)"
                                                         value={row.sku}
                                                         onChange={(e) => {
-                                                            handleInputChange(
-                                                                index,
-                                                                'sku',
-                                                                e.target.value,
-                                                            );
+                                                            handleInputChange(index, 'sku', e.target.value);
                                                             toggleDropdown(index);
                                                         }}
                                                         onFocus={() =>
                                                             toggleDropdown(index)
                                                         }
                                                     />
-                                                    {/* <InputError
-                                                        message={
-                                                            errors.products
-                                                        }
-                                                    /> */}
+                                                    <InputError message={errors?.[`products.${index}.product_variant_id`]} />
+
                                                 </>
-                                                
                                             )}
                                             {transactionType === 'transfer'
                                                 ? dropdownVisible[index] && (
-                                                      <ul className="absolute z-10 max-h-40 w-full overflow-y-auto rounded border bg-white">
-                                                          {getTransferVariants().map(
-                                                              (variant) => (
-                                                                  <li
-                                                                      key={
-                                                                          variant.id
-                                                                      }
-                                                                      className="cursor-pointer px-4 py-2 hover:bg-gray-200"
-                                                                      onClick={() =>
-                                                                          handleDropdownSelect(
-                                                                              index,
-                                                                              variant.sku,
-                                                                              variant.id,
-                                                                          )
-                                                                      }
-                                                                  >
-                                                                      {
-                                                                          variant.sku
-                                                                      }
-                                                                  </li>
-                                                              ),
-                                                          )}
-                                                          {/* <InputError message={errors.products.product_variant_id} /> */}
-                                                      </ul>
-                                                  )
+                                                    <ul className="absolute z-10 max-h-40 w-full overflow-y-auto rounded border bg-white">
+                                                        {getTransferVariants().map(
+                                                            (variant) => (
+                                                                <li key={variant.id}
+                                                                    className="cursor-pointer px-4 py-2 hover:bg-gray-200"
+                                                                    onClick={() =>
+                                                                        handleDropdownSelect(index,variant.sku,variant.id,)
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        variant.sku
+                                                                    }
+                                                                </li>
+                                                            ),
+                                                        )}
+                                                        <InputError message={errors?.[`products.${index}.product_variant_id`]} />
+
+                                                    </ul>
+                                                )
                                                 : dropdownVisible[index] && (
-                                                      <ul className="absolute z-10 max-h-40 w-full overflow-y-auto rounded border bg-white">
-                                                          {getPurchaseVariants()
-                                                              .filter(
-                                                                  (variant) =>
-                                                                      variant.sku
-                                                                          .toLowerCase()
-                                                                          .includes(
-                                                                              row.sku.toLowerCase(),
-                                                                          ),
-                                                              )
-                                                              .map(
-                                                                  (variant) => (
-                                                                      <li
-                                                                          key={
-                                                                              variant.id
-                                                                          }
-                                                                          className="cursor-pointer px-4 py-2 hover:bg-gray-200"
-                                                                          onClick={() =>
-                                                                              handleDropdownSelect(
-                                                                                  index,
-                                                                                  variant.sku,
-                                                                                  variant.id,
-                                                                              )
-                                                                          }
-                                                                      >
-                                                                          {
-                                                                              variant.sku
-                                                                          }
-                                                                      </li>
-                                                                  ),
-                                                              )}
-                                                      </ul>
-                                                  )}
+                                                    <ul className="absolute z-10 max-h-40 w-full overflow-y-auto rounded border bg-white">
+                                                        {getPurchaseVariants()
+                                                            .filter(
+                                                                (variant) =>
+                                                                    variant.sku.toLowerCase().includes(row.sku.toLowerCase(),),
+                                                            )
+                                                            .map(
+                                                                (variant) => (
+                                                                    <li key={variant.id}
+                                                                        className="cursor-pointer px-4 py-2 hover:bg-gray-200"
+                                                                        onClick={() =>
+                                                                            handleDropdownSelect(index,variant.sku,variant.id,)
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            variant.sku
+                                                                        }
+                                                                    </li>
+                                                                ),
+                                                            )
+                                                        }
+                                                    </ul>
+                                                )}
                                         </td>
 
                                         {/* Available Stock Display (Only for Transfers) */}
@@ -420,44 +450,19 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batc
                                                 placeholder="Enter Quantity"
                                                 value={row.quantity}
                                                 onChange={(e) => {
-                                                    let enteredQuantity =
-                                                        parseInt(
-                                                            e.target.value,
-                                                            10,
-                                                        ) || 0;
-                                                    if (
-                                                        transactionType ===
-                                                            'transfer' &&
-                                                        enteredQuantity >
-                                                            availableStock
-                                                    ) {
-                                                        enteredQuantity =
-                                                            availableStock; // Prevent over-requesting stock
+                                                    let enteredQuantity = parseInt(e.target.value,10,) || 0;
+                                                    if (transactionType === 'transfer' && enteredQuantity > availableStock) {
+                                                        enteredQuantity = availableStock; // Prevent over-requesting stock
                                                     }
-                                                    handleInputChange(
-                                                        index,
-                                                        'quantity',
-                                                        enteredQuantity,
-                                                    );
+                                                    handleInputChange(index,'quantity', enteredQuantity,);
                                                 }}
                                                 min="1"
-                                                max={
-                                                    transactionType ===
-                                                    'transfer'
-                                                        ? availableStock
-                                                        : ''
-                                                }
-                                                disabled={
-                                                    transactionType ===
-                                                        'transfer' &&
-                                                    availableStock === 0
-                                                }
+                                                max={transactionType === 'transfer' ? availableStock : ''}
+                                                disabled={transactionType === 'transfer' && availableStock === 0}
                                             />
-                                            <InputError
-                                                message={
-                                                    errors.transaction_type
-                                                }
-                                            />
+                                            {/* <InputError message={errors.products}/> */}
+                                            <InputError message={errors?.[`products.${index}.quantity`]} />
+
                                         </td>
 
                                         {/* Remove Button */}

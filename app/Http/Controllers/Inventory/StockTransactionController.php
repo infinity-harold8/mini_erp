@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Inventory;
 
-use App\Http\Requests\Inventory\StockTransactions\StoreStockTransactions;
+use Carbon\Carbon;
 use App\Models\Warehouse;
 use App\Models\StockLevels;
 use Illuminate\Http\Request;
@@ -12,12 +12,23 @@ use App\Models\StockTransactions;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\StockTransactionItems;
+use App\Models\Inventory\SerialNumbers;
+use App\Repositories\Inventory\Batches\BatchRepository;
+use App\Http\Requests\Inventory\StockTransactions\StoreStockTransactions;
 
 class StockTransactionController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
+    protected $batchRepository;
+
+    public function __construct(BatchRepository $batchRepository)
+    {
+        $this->batchRepository = $batchRepository;
+    }
+
     public function index(Request $request)
     {
         $query = StockTransactions::OrderBy('created_at', 'desc');
@@ -63,6 +74,7 @@ class StockTransactionController extends Controller
      */
     public function create()
     {
+        // dd(Carbon::now()->format('Ymd'));
         // Fetch all warehouses
         $warehouses = Warehouse::all();
         $product_variants = ProductVariant::all();
@@ -80,7 +92,8 @@ class StockTransactionController extends Controller
         return inertia('Inventory/Products/Stock/Transactions/Create/Page', [
             'product_variants' => $product_variants,
             'warehouses' => $warehouses,
-            'stock_levels' => $stock_levels
+            'stock_levels' => $stock_levels,
+            'batches' => $this->batchRepository->getBatchNotLinked()
         ]);
     }
 
@@ -130,6 +143,7 @@ class StockTransactionController extends Controller
                 'remarks' => $validated['remarks'],
                 'from_warehouse_id' => $validated['from_warehouse_id'],
                 'to_warehouse_id' => $validated['to_warehouse_id'],
+                'batch_id' => $validated['batch_id'],
                 'created_by' => auth()->id(),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -143,6 +157,7 @@ class StockTransactionController extends Controller
                     'stock_transaction_id' => $stockTransaction->id,
                     'product_variant_id' => $product['product_variant_id'],
                     'quantity' => $product['quantity'],
+                    'batch_id' => $validated['batch_id'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -381,12 +396,13 @@ class StockTransactionController extends Controller
     }
 
     public function update_status_to_approved(string $id){
+        // Make it single responsibility functionalities
         DB::transaction(function () use ($id) {
 
-            $transaction = StockTransactions::findOrFail($id);
+            $transaction = StockTransactions::with('batches')->findOrFail($id);
             $transaction->update(['status' => 'approved']);
 
-            $items = StockTransactionItems::where('stock_transaction_id', '=', $id)->get();
+            $items = StockTransactionItems::with('productVariant')->where('stock_transaction_id', '=', $id)->get();
 
             // $rowStockLevels = $items->map(fn($item) => [
             //     'product_variant_id' => $item->product_variant_id,
@@ -395,6 +411,7 @@ class StockTransactionController extends Controller
             //     'created_at' => now(),
             //     'updated_at' => now(),
             // ])->toArray();
+            
             // // dd($rowStockLevels);
             // StockLevels::insert($rowStockLevels);
 
@@ -408,7 +425,35 @@ class StockTransactionController extends Controller
             //     'created_at' => now(),
             //     'updated_at' => now(),
             // ])->toArray();
+
+            // $rowStockMovementsWithSerials = [];
+
+            // foreach($items as $item){
+
+            //     $serial_id = SerialNumbers::create([
+            //         'batch_id' => $transaction['batch_id'],
+            //         'product_variant_id' => $item->product_variant_id,
+            //         'serial_number' => $item->productVariant->sku . '' . Carbon::now()->format('Ymd'),
+            //         'created_at' => now(),
+            //         'updated_at' => now(),
+            //     ]);
+
+            //     $rowStockMovementsWithSerials[] = [
+            //         'product_variant_id' => $item->product_variant_id,
+            //         'from_warehouse_id' => $transaction['from_warehouse_id'],
+            //         'to_warehouse_id' => $transaction['to_warehouse_id'],
+            //         'movement_type' => $transaction['to_warehouse_id'],
+            //         'quantity' => 1, // Negative for outgoing stock
+            //         'remarks' => $transaction['remarks'],
+            //         'serial_number_id' => $serial_id,
+            //         'created_at' => now(),
+            //         'updated_at' => now(),
+            //     ];
+            // };
+
             // StockMovements::insert($rowStockMovements);
+
+
 
             foreach ($items as $item) {
                 $productVariantId = $item['product_variant_id'];

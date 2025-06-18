@@ -30,12 +30,14 @@ class StoreStockTransactions extends FormRequest
             'products.*.quantity' => 'required|integer|min:1',
             'from_warehouse_id' => 'required_if:transaction_type,transfer',
             'to_warehouse_id' => 'required|exists:warehouses,id',
+            'batch_id' => 'required_if:transaction_type,purchase'
         ];
     }
 
     public function messages(): array
     {
         return [
+            'batch_id.required_if' => 'Batch is required!',
             'transaction_type.required' => 'Please choose a Transaction Type.',
             'transaction_type.in' => 'Transaction Type is invalid!',
             'remarks.max' => 'Remarks is too long! Maximum characters is only 255.',

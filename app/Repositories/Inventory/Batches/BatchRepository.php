@@ -14,6 +14,10 @@ class BatchRepository
         return Batches::all();
     }
 
+    public function getBatchNotLinked(){
+        return Batches::whereDoesntHave('serialNumbers')->whereDoesntHave('stockTransactions')->get();
+    }
+
     public function getPaginatedBatches($pagination_value)
     {
         return Batches::with(['user', 'warehouse'])->paginate($pagination_value);

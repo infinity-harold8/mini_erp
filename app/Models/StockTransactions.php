@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Inventory\Batches;
 use App\Models\StockTransactionItems;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
@@ -34,5 +35,9 @@ class StockTransactions extends Model
 
     public function items(){
         return $this->hasMany(StockTransactionItems::class, 'stock_transaction_id');
+    }
+
+    public function batches() {
+        return $this->belongsTo(Batches::class, 'batch_id');
     }
 }
