@@ -15,6 +15,7 @@ use App\Models\StockTransactionItems;
 use App\Models\Inventory\SerialNumbers;
 use App\Repositories\Inventory\Batches\BatchRepository;
 use App\Http\Requests\Inventory\StockTransactions\StoreStockTransactions;
+use Milon\Barcode\DNS1D;
 
 class StockTransactionController extends Controller
 {
@@ -93,8 +94,8 @@ class StockTransactionController extends Controller
             'product_variants' => $product_variants,
             'warehouses' => $warehouses,
             'stock_levels' => $stock_levels,
-            'batches' => $this->batchRepository->getBatchNotLinked()
-        ]);
+            'batches' => $this->batchRepository->getBatchNotLinked(),
+         ]);
     }
 
     public function get_stock_movements(string $id){
@@ -404,16 +405,16 @@ class StockTransactionController extends Controller
 
             $items = StockTransactionItems::with('productVariant')->where('stock_transaction_id', '=', $id)->get();
 
-            // $rowStockLevels = $items->map(fn($item) => [
-            //     'product_variant_id' => $item->product_variant_id,
-            //     'warehouse_id'       => $transaction['to_warehouse_id'],
-            //     'quantity'           => $item->quantity,
-            //     'created_at' => now(),
-            //     'updated_at' => now(),
-            // ])->toArray();
+            $rowStockLevels = $items->map(fn($item) => [
+                'product_variant_id' => $item->product_variant_id,
+                'warehouse_id'       => $transaction['to_warehouse_id'],
+                'quantity'           => $item->quantity,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->toArray();
             
-            // // dd($rowStockLevels);
-            // StockLevels::insert($rowStockLevels);
+            // dd($rowStockLevels);
+            StockLevels::insert($rowStockLevels);
 
             // $rowStockMovements = $items->map(fn($item) => [
             //     'product_variant_id' => $item->product_variant_id,
@@ -426,160 +427,161 @@ class StockTransactionController extends Controller
             //     'updated_at' => now(),
             // ])->toArray();
 
-            // $rowStockMovementsWithSerials = [];
+            $rowStockMovementsWithSerials = [];
 
-            // foreach($items as $item){
+            foreach($items as $item){
 
-            //     $serial_id = SerialNumbers::create([
-            //         'batch_id' => $transaction['batch_id'],
-            //         'product_variant_id' => $item->product_variant_id,
-            //         'serial_number' => $item->productVariant->sku . '' . Carbon::now()->format('Ymd'),
-            //         'created_at' => now(),
-            //         'updated_at' => now(),
-            //     ]);
+                $serial_id = SerialNumbers::create([
+                    'batch_id' => $transaction['batch_id'],
+                    'product_variant_id' => $item->product_variant_id,
+                    'serial_number' => $item->productVariant->sku . '' . Carbon::now()->format('Ymd'),
+                    'status' => 'in_stock',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
-            //     $rowStockMovementsWithSerials[] = [
-            //         'product_variant_id' => $item->product_variant_id,
-            //         'from_warehouse_id' => $transaction['from_warehouse_id'],
-            //         'to_warehouse_id' => $transaction['to_warehouse_id'],
-            //         'movement_type' => $transaction['to_warehouse_id'],
-            //         'quantity' => 1, // Negative for outgoing stock
-            //         'remarks' => $transaction['remarks'],
-            //         'serial_number_id' => $serial_id,
-            //         'created_at' => now(),
-            //         'updated_at' => now(),
-            //     ];
-            // };
+                $rowStockMovementsWithSerials[] = [
+                    'product_variant_id' => $item->product_variant_id,
+                    'from_warehouse_id' => $transaction['from_warehouse_id'],
+                    'to_warehouse_id' => $transaction['to_warehouse_id'],
+                    'movement_type' => 'purchase',
+                    'quantity' => 1, // Negative for outgoing stock
+                    'remarks' => $transaction['remarks'],
+                    'serial_number_id' => $serial_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            };
 
-            // StockMovements::insert($rowStockMovements);
+            StockMovements::insert($rowStockMovementsWithSerials);
 
 
 
-            foreach ($items as $item) {
-                $productVariantId = $item['product_variant_id'];
-                $fromWarehouseId = $transaction['from_warehouse_id'];
-                $toWarehouseId = $transaction['to_warehouse_id'];
-                $transactionType = $transaction['transaction_type'];
-                $quantity = $item['quantity'];
-                $status = $transaction['status'];
-                $remarks = $transaction['remarks'] ?? 'Stock transaction processed';
+            // foreach ($items as $item) {
+            //     $productVariantId = $item['product_variant_id'];
+            //     $fromWarehouseId = $transaction['from_warehouse_id'];
+            //     $toWarehouseId = $transaction['to_warehouse_id'];
+            //     $transactionType = $transaction['transaction_type'];
+            //     $quantity = $item['quantity'];
+            //     $status = $transaction['status'];
+            //     $remarks = $transaction['remarks'] ?? 'Stock transaction processed';
     
-                $stockMovementsToInsert = [];
+            //     $stockMovementsToInsert = [];
     
-                if ($transactionType === 'transfer') {
-                    // ✅ Check available stock before transferring
-                    $availableStock = StockMovements::select(
-                        'product_variant_id',
-                        'warehouse_id',
-                        DB::raw("SUM(stock_change) as total_stock")
-                    )
-                    ->fromSub(function ($query) {
-                        $query->select(
-                            'product_variant_id',
-                            'to_warehouse_id as warehouse_id',
-                            DB::raw("SUM(quantity) as stock_change")
-                        )
-                        ->from('stock_movements')
-                        ->whereIn('movement_type', ['purchase', 'transfer_in', 'return'])
-                        ->groupBy('product_variant_id', 'to_warehouse_id')
+            //     if ($transactionType === 'transfer') {
+            //         // ✅ Check available stock before transferring
+            //         $availableStock = StockMovements::select(
+            //             'product_variant_id',
+            //             'warehouse_id',
+            //             DB::raw("SUM(stock_change) as total_stock")
+            //         )
+            //         ->fromSub(function ($query) {
+            //             $query->select(
+            //                 'product_variant_id',
+            //                 'to_warehouse_id as warehouse_id',
+            //                 DB::raw("SUM(quantity) as stock_change")
+            //             )
+            //             ->from('stock_movements')
+            //             ->whereIn('movement_type', ['purchase', 'transfer_in', 'return'])
+            //             ->groupBy('product_variant_id', 'to_warehouse_id')
             
-                        ->unionAll(
-                            StockMovements::select(
-                                'product_variant_id',
-                                'from_warehouse_id as warehouse_id',
-                                DB::raw("SUM(quantity) * 1 as stock_change")
-                            )
-                            ->whereIn('movement_type', ['transfer_out', 'sale'])
-                            ->groupBy('product_variant_id', 'from_warehouse_id')
-                        );
-                    }, 'stock_summary')
-                    ->where('product_variant_id', $productVariantId)
-                    ->where('warehouse_id', $fromWarehouseId)
-                    ->groupBy('product_variant_id', 'warehouse_id')
-                    ->first();
-                    // dd($availableStock);
-                    if ($availableStock->total_stock < $quantity) {
-                        throw new \Exception("Not enough stock in source warehouse for SKU {$productVariantId}.");
-                    }
+            //             ->unionAll(
+            //                 StockMovements::select(
+            //                     'product_variant_id',
+            //                     'from_warehouse_id as warehouse_id',
+            //                     DB::raw("SUM(quantity) * 1 as stock_change")
+            //                 )
+            //                 ->whereIn('movement_type', ['transfer_out', 'sale'])
+            //                 ->groupBy('product_variant_id', 'from_warehouse_id')
+            //             );
+            //         }, 'stock_summary')
+            //         ->where('product_variant_id', $productVariantId)
+            //         ->where('warehouse_id', $fromWarehouseId)
+            //         ->groupBy('product_variant_id', 'warehouse_id')
+            //         ->first();
+            //         // dd($availableStock);
+            //         if ($availableStock->total_stock < $quantity) {
+            //             throw new \Exception("Not enough stock in source warehouse for SKU {$productVariantId}.");
+            //         }
     
-                    // ✅ Deduct stock one by one
-                    for ($i = 0; $i < $quantity; $i++) {
-                        StockLevels::where('product_variant_id', $productVariantId)
-                            ->where('warehouse_id', $fromWarehouseId)
-                            ->decrement('quantity', 1);
+            //         // ✅ Deduct stock one by one
+            //         for ($i = 0; $i < $quantity; $i++) {
+            //             StockLevels::where('product_variant_id', $productVariantId)
+            //                 ->where('warehouse_id', $fromWarehouseId)
+            //                 ->decrement('quantity', 1);
     
-                        $stockMovementsToInsert[] = [
-                            'product_variant_id' => $productVariantId,
-                            'from_warehouse_id' => $fromWarehouseId,
-                            'to_warehouse_id' => $toWarehouseId,
-                            'movement_type' => 'transfer_out',
-                            'quantity' => -1, // Negative for outgoing stock
-                            'remarks' => $remarks,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
+            //             $stockMovementsToInsert[] = [
+            //                 'product_variant_id' => $productVariantId,
+            //                 'from_warehouse_id' => $fromWarehouseId,
+            //                 'to_warehouse_id' => $toWarehouseId,
+            //                 'movement_type' => 'transfer_out',
+            //                 'quantity' => -1, // Negative for outgoing stock
+            //                 'remarks' => $remarks,
+            //                 'created_at' => now(),
+            //                 'updated_at' => now(),
+            //             ];
     
-                        $stockMovementsToInsert[] = [
-                            'product_variant_id' => $productVariantId,
-                            'from_warehouse_id' => $fromWarehouseId,
-                            'to_warehouse_id' => $toWarehouseId,
-                            'movement_type' => 'transfer_in',
-                            'quantity' => 1, // Positive for incoming stock
-                            'remarks' => $remarks,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
-                    }
+            //             $stockMovementsToInsert[] = [
+            //                 'product_variant_id' => $productVariantId,
+            //                 'from_warehouse_id' => $fromWarehouseId,
+            //                 'to_warehouse_id' => $toWarehouseId,
+            //                 'movement_type' => 'transfer_in',
+            //                 'quantity' => 1, // Positive for incoming stock
+            //                 'remarks' => $remarks,
+            //                 'created_at' => now(),
+            //                 'updated_at' => now(),
+            //             ];
+            //         }
     
-                    // ✅ Batch Insert Stock Movements
-                    StockMovements::insert($stockMovementsToInsert);
+            //         // ✅ Batch Insert Stock Movements
+            //         StockMovements::insert($stockMovementsToInsert);
     
-                    // ✅ Add stock to destination warehouse one by one
-                    for ($i = 0; $i < $quantity; $i++) {
-                        StockLevels::updateOrCreate(
-                            [
-                                'product_variant_id' => $productVariantId,
-                                'warehouse_id' => $toWarehouseId,
-                            ],
-                            [
-                                'quantity' => DB::raw("quantity + 1"),
-                                'updated_at' => now(),
-                            ]
-                        );
-                    }
-                } else {
-                    // ✅ Process Purchases, Returns, Adjustments, etc.
-                    for ($i = 0; $i < $quantity; $i++) {
-                        $stockMovementsToInsert[] = [
-                            'product_variant_id' => $productVariantId,
-                            'from_warehouse_id' => null,
-                            'to_warehouse_id' => $toWarehouseId,
-                            'movement_type' => $transactionType,
-                            'quantity' => 1,
-                            'remarks' => $remarks,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
-                    }
+            //         // ✅ Add stock to destination warehouse one by one
+            //         for ($i = 0; $i < $quantity; $i++) {
+            //             StockLevels::updateOrCreate(
+            //                 [
+            //                     'product_variant_id' => $productVariantId,
+            //                     'warehouse_id' => $toWarehouseId,
+            //                 ],
+            //                 [
+            //                     'quantity' => DB::raw("quantity + 1"),
+            //                     'updated_at' => now(),
+            //                 ]
+            //             );
+            //         }
+            //     } else {
+            //         // ✅ Process Purchases, Returns, Adjustments, etc.
+            //         for ($i = 0; $i < $quantity; $i++) {
+            //             $stockMovementsToInsert[] = [
+            //                 'product_variant_id' => $productVariantId,
+            //                 'from_warehouse_id' => null,
+            //                 'to_warehouse_id' => $toWarehouseId,
+            //                 'movement_type' => $transactionType,
+            //                 'quantity' => 1,
+            //                 'remarks' => $remarks,
+            //                 'created_at' => now(),
+            //                 'updated_at' => now(),
+            //             ];
+            //         }
     
-                    // ✅ Batch Insert Stock Movements
-                    StockMovements::insert($stockMovementsToInsert);
+            //         // ✅ Batch Insert Stock Movements
+            //         StockMovements::insert($stockMovementsToInsert);
     
-                    // ✅ Add stock to warehouse one by one
-                    for ($i = 0; $i < $quantity; $i++) {
-                        StockLevels::updateOrCreate(
-                            [
-                                'product_variant_id' => $productVariantId,
-                                'warehouse_id' => $toWarehouseId,
-                            ],
-                            [
-                                'quantity' => DB::raw("quantity + 1"),
-                                'updated_at' => now(),
-                            ]
-                        );
-                    }
-                }
-            }
+            //         // ✅ Add stock to warehouse one by one
+            //         for ($i = 0; $i < $quantity; $i++) {
+            //             StockLevels::updateOrCreate(
+            //                 [
+            //                     'product_variant_id' => $productVariantId,
+            //                     'warehouse_id' => $toWarehouseId,
+            //                 ],
+            //                 [
+            //                     'quantity' => DB::raw("quantity + 1"),
+            //                     'updated_at' => now(),
+            //                 ]
+            //             );
+            //         }
+            //     }
+            // }
         });
 
 

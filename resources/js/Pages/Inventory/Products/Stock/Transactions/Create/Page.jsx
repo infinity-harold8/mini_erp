@@ -7,7 +7,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import { Select } from '@headlessui/react';
 
-const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batches }) => {
+const StockTransactionForm = ({ product_variants, warehouses, stock_levels, batches, barcode }) => {
     const [rows, setRows] = useState([]);
     const [dropdownVisible, setDropdownVisible] = useState({});
     const [transactionType, setTransactionType] = useState('purchase');

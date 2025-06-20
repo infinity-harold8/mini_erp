@@ -16,8 +16,6 @@ const EditPromotionConditions = ({ promotion, warehouses }) => {
         is_active: promotion.data.is_active || '0'
     });
 
-    const { flash } = usePage().props;
-
     const handleSubmit = (e) => {
         e.preventDefault();
         put(`/promotions/${promotion.id}`);
@@ -39,12 +37,6 @@ const EditPromotionConditions = ({ promotion, warehouses }) => {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-
-                            {
-                                flash.success && <div className="my-4 bg-emerald-100 p-4 w-full border border-emerald-500 rounded-xl">
-                                    <p className="text-emerald-600 text-sm">{flash.success}</p>
-                                </div>
-                            }
 
                             <form onSubmit={handleSubmit}>
                                 {/* Name Input Field */}

@@ -5,8 +5,6 @@ import { LinkIconCreate } from '@/Components/UI/Links';
 
 const PromotionsIndex = ({ promotions }) => {
 
-    const { flash } = usePage().props;
-
     // const [promotions, setPromotions] = useState(promotions);
 
     useEffect(() => {
@@ -41,14 +39,6 @@ const PromotionsIndex = ({ promotions }) => {
                     New Promotion
                 </Link>
             </div>
-
-            {flash.success && (
-                <div className="my-4 w-full rounded-xl border border-emerald-500 bg-emerald-100 p-4">
-                    <p className="text-sm text-emerald-600">
-                        {flash.success}
-                    </p>
-                </div>
-            )}
 
             <table className="min-w-full table-auto border-collapse border border-gray-200">
                 <thead>

@@ -16,7 +16,8 @@ class Batches extends Model
         'received_date',
         'description',
         'warehouse_id',
-        'user_id'
+        'user_id',
+        'gs1_batch_code'
     ];
 
 

@@ -125,7 +125,7 @@ class ProductsController extends Controller
 
     public function show($id){
         $product = Product::with(['colors', 'sizes:id,size_name', 'heelHeights', 'categories', 'sizes.sizeValues'])->find($id);
-        $product_variants = ProductVariant::where('product_id', '=',$id)->get();
+        $product_variants = ProductVariant::with(['stockLevels', 'stockMovements'])->where('product_id', '=',$id)->get();
         // dd(ProductVariant::where('product_id', '=',$id)->get());
         return inertia('Inventory/Products/View/Page', [
             'product' => $product,
@@ -194,11 +194,77 @@ class ProductsController extends Controller
         ]);
     }
     
+    private function calculateEAN13CheckDigit($number)
+    {
+        $digits = str_split($number);
+        $sum = 0;
+
+        foreach ($digits as $i => $digit) {
+            // EAN starts counting from the LEFT, but positions are 1-based.
+            // Even positions (2nd, 4th...) are multiplied by 3
+            $weight = ($i % 2 === 0) ? 1 : 3;
+            $sum += $digit * $weight;
+        }
+
+        return (10 - ($sum % 10)) % 10;
+    }
+
+    public function generateBarcode($ids)
+    {
+        $barcodes = [];
+
+        foreach ($ids as $id) {
+            // You can change this to product code, SKU, or whatever base
+            $base = str_pad($id, 12, '0', STR_PAD_LEFT);
+            $checkDigit = $this->calculateEAN13CheckDigit($base);
+            $ean13 = $base . $checkDigit;
+
+            $barcodes[] = [
+                'id' => $id,
+                'barcode' => $ean13,
+            ];
+        }
+
+        return $barcodes;
+    }
 
     public function store_variants(Request $request){
-        ProductVariant::insert($request->product_variants);
+        DB::transaction(function () use ($request) {
+            $ids = collect($request->product_variants)
+                ->map(fn ($data) => ProductVariant::create($data)->id)   // returns Illuminate\Support\Collection
+                ->all();         
+            $generatedBarcodeValues = $this->generateBarcode($ids);
 
+            foreach($generatedBarcodeValues as $generatedBarcodeValue){
+                $product_variant = ProductVariant::find($generatedBarcodeValue['id']);
+                $product_variant->update([
+                    'gtin' => $generatedBarcodeValue['barcode'],
+                    'ean' => $generatedBarcodeValue['barcode']
+                ]);
+            }
+        });
+        
         return redirect()->route('products.index')->with('success', 'Product updated successfully!');
+    }
+
+    public function destroy_variant(string $id){
+        // You can swap this for route-model binding if you like.
+        $variant = ProductVariant::findOrFail($id);
+
+        // 👀 1.  Quick existence test on related tables
+        $hasBlockingRelations =
+            $variant->stockLevels()->exists() ||
+            $variant->stockMovements()->exists();
+
+        if ($hasBlockingRelations) {
+            return back()->with('error',
+                'You can’t delete this variant—stock levels or movements already exist.');
+        }
+
+        // 2.  Actually delete (inside a transaction just to be extra-safe)
+        DB::transaction(fn () => $variant->delete());
+
+        return back()->with('success', 'Product Variant deleted successfully!');
     }
 
     public function edit($id)

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
@@ -8,6 +8,8 @@ import Colors from '@/Components/Colors';
 import Sizes from '@/Components/Sizes';
 import HeelHeights from '@/Components/HeelHeights';
 import Categories from '@/Components/Categories';
+import Buttons from '@/Components/UI/Buttons';
+
 
 const ViewProduct = ({ product, product_variants, colors, sizes, size_values, heel_heights, categories }) => {
   const { data, setData, post, errors } = useForm({
@@ -81,6 +83,7 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
   useEffect(() => {
     // console.log(product);
     // console.log(size_values);
+    console.log(product_variants);
   }, []);
 
   return (
@@ -267,6 +270,7 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
                                                         <th className="px-4 py-3 font-medium">SKU</th>
                                                         <th className="px-4 py-3 font-medium">SRP</th>
                                                         <th className="px-4 py-3 font-medium">COST</th>
+                                                        <th className="px-4 py-3 font-medium">ACTIONS</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-200">
@@ -282,6 +286,51 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
                                                                 <td className="px-4 py-2 text-gray-900">{variant.sku}</td>
                                                                 <td className="px-4 py-2 text-gray-900">{variant.unit_price}</td>
                                                                 <td className="px-4 py-2 text-gray-900">{variant.cost}</td>
+                                                                <td className="px-4 py-2 text-gray-900 space-x-2">
+                                                                    {
+                                                                        variant.stock_levels.length > 0 || variant.stock_movements.length > 0 ? 
+                                                                        <></> 
+                                                                        : 
+                                                                        <Buttons.IconDeleteButton
+                                                                            onClick={(e) => {
+                                                                                e.preventDefault();
+                                                                                if (
+                                                                                    confirm(
+                                                                                        'Are you sure you want to delete this Variant?',
+                                                                                    )
+                                                                                ) {
+                                                                                    router.delete(
+                                                                                        `/inventory/products/variant-delete/${variant.id}`,
+                                                                                    );
+                                                                                }
+                                                                            }}
+                                                                            title="Delete"
+                                                                        />
+                                                                    }
+
+                                                                    {
+                                                                        variant.stock_levels.length > 0 || variant.stock_movements.length > 0 ? 
+                                                                        <></> 
+                                                                        : 
+                                                                        <Buttons.IconUpdateButton
+                                                                            onClick={(e) => {
+                                                                                e.preventDefault();
+                                                                                if (
+                                                                                    confirm(
+                                                                                        'Are you sure you want to delete this Variant?',
+                                                                                    )
+                                                                                ) {
+                                                                                    router.delete(
+                                                                                        `/inventory/products/variant-delete/${variant.id}`,
+                                                                                    );
+                                                                                }
+                                                                            }}
+                                                                            title="Update"
+                                                                        />
+                                                                    }
+                                                                    
+                                                                </td>
+                                                                
                                                             </tr>
                                                         );
                                                     })}

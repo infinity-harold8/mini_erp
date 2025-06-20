@@ -1,10 +1,12 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import FlashMessage from '@/Components/Flash';
 import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
     // Get user info from Inertia, and assume allowedRoutes is included
     const { auth } = usePage().props;
+    const { flash } = usePage().props;
     const user = auth.user;
 
     // allowedRoutes should be an array of route names the user is permitted to access.
@@ -32,6 +34,7 @@ export default function AuthenticatedLayout({ header, children }) {
     useEffect(() => {
         // console.log(user.allowed_routes);
         // console.log('allowedRoutes:', user);
+        console.log(flash);
     }, [])
 
 
@@ -47,6 +50,13 @@ export default function AuthenticatedLayout({ header, children }) {
 
     return (
         <div className="flex min-h-screen bg-gray-100">
+            {flash?.success && (
+                <FlashMessage key={`success-${Date.now()}`} type={'success'} message={flash.success}/>
+            )}
+            {flash?.error && (
+                <FlashMessage key={`error-${Date.now()}`} type={'error'} message={flash.error}/>
+            )}
+            
             <div className={`flex flex-col ${collapsed ? 'w-16' : 'w-64'} transition-all duration-300 bg-white border-r`}>
                 <div className="flex flex-col items-center justify-center py-6 px-4">
                     <Link href="/" className="block">

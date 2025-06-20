@@ -20,7 +20,14 @@ class ProductVariant extends Model
         'color_id',
         'heel_height_id',
         'size_value_id',
-        'sku'
+        'category_id',
+        'unit_price',
+        'cost',
+        'size_id',
+        'sku',
+        'gtin',
+        'ean',
+        'upc'
     ];
 
     protected $appends = [

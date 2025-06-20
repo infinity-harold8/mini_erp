@@ -3,7 +3,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 const Admin = ({ csrf_token }) => {
-    const { roles, flash } = usePage().props;
+    const { roles } = usePage().props;
 
     const destroy = (e, id) => {
         e.preventDefault();
@@ -35,11 +35,6 @@ const Admin = ({ csrf_token }) => {
                                     Add Role
                                 </Link>
                             </div>
-                            {flash?.success && (
-                                <p className="mb-4 text-sm text-green-500">
-                                    {flash.success}
-                                </p>
-                            )}
                             <table className="w-full border-collapse border border-gray-200">
                                 <thead className="bg-gray-100">
                                     <tr>

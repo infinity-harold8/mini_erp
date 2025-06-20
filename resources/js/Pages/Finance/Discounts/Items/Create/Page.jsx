@@ -44,12 +44,6 @@ const CreateDiscountPerItems = ({ discount, products }) => {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            {
-                                auth.flash.success && <div className="my-4 bg-emerald-100 p-4 w-full border border-emerald-500 rounded-xl">
-                                    <p className="text-emerald-600 text-sm">{auth.flash.success}</p>
-                                </div>
-                            }
-                            
                             <div>
                                 {/* Name Input Field */}
                                 <div className="mb-6">

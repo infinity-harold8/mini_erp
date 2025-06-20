@@ -16,9 +16,6 @@ const CreatePromotionConditions = ({ initialData = {}, promotion, products, colo
         discount_value: '0',
         promotion_id: promotion.data.id
       })
-
-      const { flash } = usePage().props;
-      
     
       const typeOptions = [
         { value: 'product', label: 'Product' },
@@ -115,13 +112,6 @@ const CreatePromotionConditions = ({ initialData = {}, promotion, products, colo
                               placeholder="Promo Name"
                             />
                             … */}
-                            {
-                                flash.success && (
-                                    <div className="bg-green-500 text-white px-4 py-2 rounded-md mb-4">
-                                        {flash.success}
-                                    </div>
-                                )
-                            }
 
                                 <div>
                                     <h3 className="mb-2 font-semibold">

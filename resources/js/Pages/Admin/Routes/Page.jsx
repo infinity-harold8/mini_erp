@@ -3,7 +3,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 const UserRoutes = ({ csrf_token }) => {
-    const { roles, flash } = usePage().props;
+    const { roles } = usePage().props;
 
     return (
         <AuthenticatedLayout
@@ -29,11 +29,6 @@ const UserRoutes = ({ csrf_token }) => {
                                     Assign User to Routes
                                 </Link> */}
                             </div>
-                            {flash?.success && (
-                                <p className="mb-4 text-sm text-green-500">
-                                    {flash.success}
-                                </p>
-                            )}
                             <table className="w-full border-collapse border border-gray-200">
                                 <thead className="bg-gray-100">
                                     <tr>

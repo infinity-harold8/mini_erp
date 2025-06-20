@@ -17,7 +17,9 @@ class SerialNumbers extends Model
         'status',
         'quantity',
         'warehouse_id',
-        'stock_transaction_items_id'
+        'stock_transaction_items_id',
+        'series',
+        'gs1_payload'
     ];
 
     public function user()
