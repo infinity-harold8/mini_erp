@@ -36,7 +36,7 @@ export default function SerialNumber({ serial_numbers }) {
                             <Table.Head>
                                 <Table.Row>
                                     <Table.Th>Batch #</Table.Th>
-                                    <Table.Th>Product SKU</Table.Th>
+                                    {/* <Table.Th>Product SKU</Table.Th> */}
                                     <Table.Th>Serial #</Table.Th>
                                     <Table.Th>Status</Table.Th>
                                     <Table.Th>Qty</Table.Th>
@@ -48,7 +48,7 @@ export default function SerialNumber({ serial_numbers }) {
                                 {serial_numbers.data?.map((serial) => (
                                     <Table.Row key={serial.id}>
                                         <Table.Td>{serial.batch.batch_number}</Table.Td>
-                                        <Table.Td>{serial.product_variant.product_sku}</Table.Td>
+                                        {/* <Table.Td>{serial.product_variant.product_sku}</Table.Td> */}
                                         <Table.Td>{serial.serial_number}</Table.Td>
                                         <Table.Td>{serial.status}</Table.Td>
                                         <Table.Td>{serial.quantity}</Table.Td>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import InventoryLayout from '@/Layouts/InventoryLayout';
-import { LinkIconCreate } from '@/Components/UI/Links';
+import Links, { LinkIconCreate } from '@/Components/UI/Links';
+import Buttons from '@/Components/UI/Buttons';
 
 const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights, categories }) => {
     const [search, setSearch] = useState("");
@@ -48,6 +49,10 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
         XLSX.writeFile(workbook, `product_variants_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
+    useEffect(() => {
+        console.log(products.data);
+    }, [products]); 
+
     return (
         <InventoryLayout
             header={
@@ -57,12 +62,11 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                     </h2>
                     <LinkIconCreate
                         href="/inventory/stock/transactions"
-                        name={"Stock Transactions"}
+                        name={'Stock Transactions'}
                     />
                 </div>
             }
         >
-
             <div className="p-6">
                 <div className="container mx-auto p-6">
                     <div className="mb-6 flex items-center justify-between">
@@ -70,7 +74,7 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                         <div className="flex gap-2">
                             <button
                                 onClick={handleExportExcel}
-                                className="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600"
+                                className="rounded bg-green-500 px-4 py-2 text-white shadow hover:bg-green-600"
                             >
                                 Export to Excel
                             </button>
@@ -111,7 +115,10 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                         >
                             <option value="">Size Values</option>
                             {size_values.map((size_value) => (
-                                <option key={size_value.id} value={size_value.id}>
+                                <option
+                                    key={size_value.id}
+                                    value={size_value.id}
+                                >
                                     {size_value.size_values}
                                 </option>
                             ))}
@@ -149,13 +156,17 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                             onChange={(e) => setQtyFilter(e.target.value)}
                         >
                             <option value="all">All Quantities</option>
-                            <option value="negative">Negative Quantities</option>
+                            <option value="negative">
+                                Negative Quantities
+                            </option>
                             <option value="zero">Zero Quantities</option>
-                            <option value="positive">Positive Quantities</option>
+                            <option value="positive">
+                                Positive Quantities
+                            </option>
                         </select>
                     </div>
 
-                    <div className="flex items-center gap-2 mb-4">
+                    <div className="mb-4 flex items-center gap-2">
                         <input
                             type="text"
                             placeholder="Search for a product..."
@@ -165,51 +176,78 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                         />
                         <button
                             onClick={handleFilter}
-                            className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                            className="rounded bg-blue-500 px-4 py-2 text-white shadow hover:bg-blue-600"
                         >
                             Filter
                         </button>
                     </div>
 
                     {/* Table */}
-                    <table className="w-full table-auto border-collapse border border-gray-300 text-center mt-4">
+                    <table className="mt-4 w-full table-auto border-collapse border border-gray-300 text-center text-xs">
                         <thead>
                             <tr className="bg-gray-100">
-                                <th className="border border-gray-300 px-4 py-2">Product SKU</th>
-                                <th className="border border-gray-300 px-4 py-2">Overall Qty</th>
-                                <th className="border border-gray-300 px-4 py-2">Heel Height</th>
-                                <th className="border border-gray-300 px-4 py-2">Size</th>
-                                <th className="border border-gray-300 px-4 py-2">Size Values</th>
-                                <th className="border border-gray-300 px-4 py-2">Category</th>
-                                <th className="border border-gray-300 px-4 py-2">Action</th>
+                                <th className="border border-gray-300 px-4 py-2">
+                                    Product SKU
+                                </th>
+                                <th className="border border-gray-300 px-4 py-2">
+                                    End
+                                </th>
+                                <th className="border border-gray-300 px-4 py-2">
+                                    Sold
+                                </th>
+                                <th className="border border-gray-300 px-4 py-2">
+                                    Purchased
+                                </th>
+                                <th className="border border-gray-300 px-4 py-2">
+                                    Repairs
+                                </th>
+                                <th className="border border-gray-300 px-4 py-2">
+                                    Return
+                                </th>
+                                <th className="border border-gray-300 px-4 py-2">
+                                    Replacement
+                                </th>
+                                <th className="border border-gray-300 px-4 py-2">
+                                    Action
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             {products.data.map((product) => (
                                 <tr key={product.id}>
-                                    <td className="border border-gray-300 px-4 py-2">{product.sku}</td>
                                     <td className="border border-gray-300 px-4 py-2">
-                                        {(product.total_purchased - (-product.total_sold))}
+                                        {product.sku}
                                     </td>
                                     <td className="border border-gray-300 px-4 py-2">
-                                        {product.heel_heights.value}
+                                        {product.current_stocks}
                                     </td>
                                     <td className="border border-gray-300 px-4 py-2">
-                                        {product.sizes.size_name}
+                                        {product.total_sold}
                                     </td>
                                     <td className="border border-gray-300 px-4 py-2">
-                                        {product.size_values.size_values}
+                                        {product.total_purchased}
                                     </td>
                                     <td className="border border-gray-300 px-4 py-2">
-                                        {product.categories.category_name}
+                                        {product.total_repair}
+                                    </td>
+                                    <td className="border border-gray-300 px-4 py-2">
+                                        {product.total_return}
+                                    </td>
+                                    <td className="border border-gray-300 px-4 py-2">
+                                        {product.total_replacement}
                                     </td>
                                     <td className="space-x-2 border border-gray-300 px-6 py-3">
-                                        <Link
+                                        <Links.LinkIconView
+                                            href={`/inventory/product/variant/${product.id}`}
+                                            
+                                            title="View Variant"
+                                        />
+                                        {/* <Link
                                             href={`/inventory/product/variant/${product.id}`}
                                             className="text-orange-500 hover:underline"
                                         >
                                             View
-                                        </Link>
+                                        </Link> */}
                                     </td>
                                 </tr>
                             ))}
@@ -230,17 +268,20 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                             });
                                         }
                                     }}
-                                    className={`mx-1 px-3 py-1 border rounded ${
-                                        link.active ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
+                                    className={`mx-1 rounded border px-3 py-1 ${
+                                        link.active
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-white text-blue-500'
                                     }`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                    dangerouslySetInnerHTML={{
+                                        __html: link.label,
+                                    }}
                                 ></button>
                             ))}
                         </div>
                     )}
                 </div>
             </div>
-
         </InventoryLayout>
     );
 };

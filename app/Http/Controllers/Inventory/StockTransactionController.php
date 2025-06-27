@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use Carbon\Carbon;
+use Milon\Barcode\DNS1D;
 use App\Models\Warehouse;
 use App\Models\StockLevels;
 use Illuminate\Http\Request;
@@ -11,11 +12,11 @@ use App\Models\StockMovements;
 use App\Models\StockTransactions;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Models\StockTransactionItems;
 use App\Models\Inventory\SerialNumbers;
 use App\Repositories\Inventory\Batches\BatchRepository;
 use App\Http\Requests\Inventory\StockTransactions\StoreStockTransactions;
-use Milon\Barcode\DNS1D;
 
 class StockTransactionController extends Controller
 {
@@ -402,60 +403,74 @@ class StockTransactionController extends Controller
 
             $transaction = StockTransactions::with('batches')->findOrFail($id);
             $transaction->update(['status' => 'approved']);
-
+            // dd($transaction);
             $items = StockTransactionItems::with('productVariant')->where('stock_transaction_id', '=', $id)->get();
 
             $rowStockLevels = $items->map(fn($item) => [
                 'product_variant_id' => $item->product_variant_id,
                 'warehouse_id'       => $transaction['to_warehouse_id'],
                 'quantity'           => $item->quantity,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ])->toArray();
             
             // dd($rowStockLevels);
             StockLevels::insert($rowStockLevels);
 
-            // $rowStockMovements = $items->map(fn($item) => [
-            //     'product_variant_id' => $item->product_variant_id,
-            //     'from_warehouse_id' => $transaction['from_warehouse_id'],
-            //     'to_warehouse_id' => $transaction['to_warehouse_id'],
-            //     'movement_type' => $transaction['to_warehouse_id'],
-            //     'quantity' => $item->quantity, // Negative for outgoing stock
-            //     'remarks' => $transaction['remarks'],
-            //     'created_at' => now(),
-            //     'updated_at' => now(),
-            // ])->toArray();
-
             $rowStockMovementsWithSerials = [];
-
+            $today = Carbon::now()->format('ymd');
             foreach($items as $item){
+                // dd($item->productVariant);
+                $prefix = $item->productVariant->sku.''.$today;
+                // $serial = [];
+                for($i = 0; $i < $item->quantity; $i++){
 
-                $serial_id = SerialNumbers::create([
-                    'batch_id' => $transaction['batch_id'],
-                    'product_variant_id' => $item->product_variant_id,
-                    'serial_number' => $item->productVariant->sku . '' . Carbon::now()->format('Ymd'),
-                    'status' => 'in_stock',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                    // removing '-' in batch number
 
-                $rowStockMovementsWithSerials[] = [
-                    'product_variant_id' => $item->product_variant_id,
-                    'from_warehouse_id' => $transaction['from_warehouse_id'],
-                    'to_warehouse_id' => $transaction['to_warehouse_id'],
-                    'movement_type' => 'purchase',
-                    'quantity' => 1, // Negative for outgoing stock
-                    'remarks' => $transaction['remarks'],
-                    'serial_number_id' => $serial_id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
+                    $batch = explode('-', $transaction->batches->batch_number);
+                    // dd($batch);
+                    $newBatchValue = $batch[0].''.$batch[1];
+                    
+                    // making a series before insertion
+                    $count = DB::table('serial_numbers')
+                    ->where('serial_number', 'like', "$prefix%")
+                    ->count();
+                    $sequence = str_pad($count + 1, 4, '0', STR_PAD_LEFT);  // Always 4 digits
+                    $serialNumber = $prefix.''.$sequence;
+
+
+                    $serial = SerialNumbers::create([
+                        'batch_id' => $transaction['batch_id'],
+                        'product_variant_id' => $item->product_variant_id,
+                        'serial_number' => $serialNumber,
+                        'series' => $count + 1,
+                        'warehouse_id' => $transaction['to_warehouse_id'],
+                        'status' => 'in_stock',
+                        'quantity' => 1,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                        'created_by' => Auth::user()->id,
+                        'stock_transaction_items_id' => $item->id,
+                        'gs1_payload' => '(01)'.$item->productVariant->ean.'(10)'.$newBatchValue.'(21)'.$serialNumber,
+                    ]);
+
+                    $rowStockMovementsWithSerials[] = [
+                        'product_variant_id' => $item->product_variant_id,
+                        'from_warehouse_id' => $transaction['from_warehouse_id'],
+                        'to_warehouse_id' => $transaction['to_warehouse_id'],
+                        'movement_type' => 'purchase',
+                        'quantity' => 1,
+                        'remarks' => $transaction['remarks'],
+                        'serial_number_id' => $serial->id,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                        'stock_transaction_id' => $item->stock_transaction_id,
+                    ];
+                }
+
             };
 
             StockMovements::insert($rowStockMovementsWithSerials);
-
-
 
             // foreach ($items as $item) {
             //     $productVariantId = $item['product_variant_id'];
@@ -588,8 +603,100 @@ class StockTransactionController extends Controller
         return redirect()->route('transactions.index')->with('success', 'Stock transaction updated successfully!');
     }
 
-    public function update_status_to_approved_transfer(){
+    public function update_status_to_approved_transfer(string $id){
+                // Make it single responsibility functionalities
+        DB::transaction(function () use ($id) {
 
+            $transaction = StockTransactions::with('batches')->findOrFail($id);
+            $transaction->update(['status' => 'approved']);
+            // dd($transaction);
+            $items = StockTransactionItems::with('productVariant')->where('stock_transaction_id', '=', $id)->get();
+            
+            $sourceWarehosue = Warehouse::with(['stockLevels'])->find($transaction['from_warehouse_id']);
+            
+            foreach($items as $item){
+                $current_stocks = StockLevels::sum('quantity')
+                    ->where('product_variant_id', '=', $item->product_variant_id)
+                    ->where('warehouse_id', '=', $transaction['from_warehouse_id'])
+                    ->get();
+
+                $validated = $item->quantity > $current_stocks->quantity;
+
+                if($validated){
+                    return back()->with('error', "Stock quantity is not enough to transfer");
+                }
+            }
+
+            $rowStockLevels = $items->map(fn($item) => [
+                'product_variant_id' => $item->product_variant_id,
+                'warehouse_id'       => $transaction['to_warehouse_id'],
+                'quantity'           => $item->quantity,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ])->toArray();
+            
+            // dd($rowStockLevels);
+            StockLevels::insert($rowStockLevels);
+
+            $rowStockMovementsWithSerials = [];
+            $today = Carbon::now()->format('ymd');
+            foreach($items as $item){
+                // dd($item->productVariant);
+                $prefix = $item->productVariant->sku.''.$today;
+                // $serial = [];
+                for($i = 0; $i < $item->quantity; $i++){
+
+                    // removing '-' in batch number
+
+                    $batch = explode('-', $transaction->batches->batch_number);
+                    // dd($batch);
+                    $newBatchValue = $batch[0].''.$batch[1];
+                    
+                    // making a series before insertion
+                    $count = DB::table('serial_numbers')
+                    ->where('serial_number', 'like', "$prefix%")
+                    ->count();
+                    $sequence = str_pad($count + 1, 4, '0', STR_PAD_LEFT);  // Always 4 digits
+                    $serialNumber = $prefix.''.$sequence;
+
+
+                    $serial = SerialNumbers::create([
+                        'batch_id' => $transaction['batch_id'],
+                        'product_variant_id' => $item->product_variant_id,
+                        'serial_number' => $serialNumber,
+                        'series' => $count + 1,
+                        'warehouse_id' => $transaction['to_warehouse_id'],
+                        'status' => 'in_stock',
+                        'quantity' => 1,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                        'created_by' => Auth::user()->id,
+                        'stock_transaction_items_id' => $item->id,
+                        'gs1_payload' => '(01)'.$item->productVariant->ean.'(10)'.$newBatchValue.'(21)'.$serialNumber,
+                    ]);
+
+                    $rowStockMovementsWithSerials[] = [
+                        'product_variant_id' => $item->product_variant_id,
+                        'from_warehouse_id' => $transaction['from_warehouse_id'],
+                        'to_warehouse_id' => $transaction['to_warehouse_id'],
+                        'movement_type' => 'purchase',
+                        'quantity' => 1,
+                        'remarks' => $transaction['remarks'],
+                        'serial_number_id' => $serial->id,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                        'stock_transaction_id' => $item->stock_transaction_id,
+                    ];
+                }
+
+            };
+
+            StockMovements::insert($rowStockMovementsWithSerials);
+
+        });
+
+
+        return redirect()->route('transactions.index')->with('success', 'Stock transaction updated successfully!');
     }
 
     public function update_status_to_rejected(string $id){

@@ -71,6 +71,7 @@ Route::middleware(['auth', 'route.authorization'])->group(function () {
     Route::post('/inventory/products/variants', [ProductsController::class, 'store_variants']);
     Route::get('/inventory/product/variant/{id}', [ProductsController::class, 'show_product_variant']);
     Route::delete('/inventory/products/variant-delete/{id}', [ProductsController::class, 'destroy_variant']);
+    Route::post('/inventory/product/variant-update', [ProductsController::class, 'update_variants']);
     Route::resource('/inventory_mto_products', MadeToOrderProductsController::class);
 
     // Route::post('/inventory/product/front_image/upload', [ProductsController::class, 'update_front_image']);

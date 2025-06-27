@@ -1,5 +1,6 @@
 import React from 'react';
-import { CheckIcon, PencilIcon, RefreshCwIcon, SaveIcon as SaveIconLucide, Trash2Icon } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { CheckIcon, PencilIcon, RefreshCwIcon, SaveIcon as SaveIconLucide, Trash2Icon, Eye, Icon } from 'lucide-react';
 
 // Independent Text Buttons
 export const SubmitButton = (props) => (
@@ -104,7 +105,7 @@ const Buttons = {
     IconEditButton,
     IconUpdateButton,
     IconSaveButton,
-    IconDeleteButton,
+    IconDeleteButton
 };
 
 export default Buttons;

@@ -36,17 +36,29 @@ class StockLevelController extends Controller
                 'stockLevels',
                 'stockMovements'
             ])
+            ->withSum(['stockLevels as qty_in' => function ($query) {
+                $query->whereIn('movement_type', ['in-stock', 'return']);
+            }], 'quantity')
+            ->withSum(['stockLevels as qty_out' => function ($query) {
+                $query->whereIn('movement_type', ['sold', 'repair']);
+            }], 'quantity')
             ->withSum(['stockMovements as total_purchased' => function ($query) {
                 $query->where('movement_type', 'purchase');
             }], 'quantity')
             ->withSum(['stockMovements as total_sold' => function ($query) {
                 $query->where('movement_type', 'sale');
             }], 'quantity')
-            ->withSum(['stockMovements as total_transfer' => function ($query) {
-                $query->where('movement_type', 'transfer');
+            ->withSum(['stockMovements as total_transfer_in' => function ($query) {
+                $query->where('movement_type', 'transfer_in');
+            }], 'quantity')
+            ->withSum(['stockMovements as total_transfer_out' => function ($query) {
+                $query->where('movement_type', 'transfer_in');
             }], 'quantity')
             ->withSum(['stockMovements as total_return' => function ($query) {
                 $query->where('movement_type', 'return');
+            }], 'quantity')
+            ->withSum(['stockMovements as total_replacement' => function ($query) {
+                $query->where('movement_type', 'replacement');
             }], 'quantity')
             ->withSum(['stockMovements as total_adjustment' => function ($query) {
                 $query->where('movement_type', 'adjustment');

@@ -31,8 +31,9 @@ class ProductVariant extends Model
     ];
 
     protected $appends = [
-        'total_purchased', 'total_sold', 'total_transfer',
-        'total_return', 'total_adjustment', 'total_correction', 'total_repair'
+        'total_purchased', 'total_sold', 'total_transfer_in', 'total_transfer_out',
+        'total_return', 'total_adjustment', 'total_correction', 'total_repair', 'total_replacement',
+        'current_stocks'
     ];
 
     public function product()
@@ -77,6 +78,11 @@ class ProductVariant extends Model
         return $this->morphMany(PromotionConditions::class, 'conditional', 'conditional_type', 'conditional_id');
     }
 
+    public function getCurrentStocksAttribute()
+    {
+        return ($this->qty_in ?? 0) - ($this->qty_out ?? 0);
+    }
+
     // Define Accessors for Each Attribute
     public function getTotalPurchasedAttribute()
     {
@@ -88,9 +94,14 @@ class ProductVariant extends Model
         return $this->attributes['total_sold'] ?? 0;
     }
 
-    public function getTotalTransferAttribute()
+    public function getTotalTransferInAttribute()
     {
-        return $this->attributes['total_transfer'] ?? 0;
+        return $this->attributes['total_transfer_in'] ?? 0;
+    }
+
+    public function getTotalTransferOutAttribute()
+    {
+        return $this->attributes['total_transfer_in'] ?? 0;
     }
 
     public function getTotalReturnAttribute()
@@ -111,6 +122,11 @@ class ProductVariant extends Model
     public function getTotalRepairAttribute()
     {
         return $this->attributes['total_repair'] ?? 0;
+    }
+
+    public function getTotalReplacementAttribute()
+    {
+        return $this->attributes['total_replacement'] ?? 0;
     }
 
 }

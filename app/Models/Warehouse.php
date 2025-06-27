@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\StockLevels;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -20,5 +21,9 @@ class Warehouse extends Model
     public function user_warehouse()
     {
         return $this->belongsToMany(User::class, 'user_warehouse', 'warehouse_id', 'user_id');
+    }
+
+    public function stockLevels(){
+        return $this->hasMany(StockLevels::class, 'warehouse_id');
     }
 }

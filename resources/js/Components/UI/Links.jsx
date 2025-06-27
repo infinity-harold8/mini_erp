@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckIcon, PencilIcon, PlusIcon, RefreshCwIcon, SaveIcon as SaveIconLucide, Trash2Icon } from 'lucide-react';
+import { CheckIcon, PencilIcon, PlusIcon, RefreshCwIcon, SaveIcon as SaveIconLucide, Trash2Icon, Eye } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 
 export const LinkCreate = (props) => {
@@ -62,13 +62,23 @@ export const LinkIconAssign = props => {
     )
 }
 
+export const LinkIconView = (props) => (
+    <Link
+        className="inline-flex items-center rounded-md bg-gray-100 p-2 hover:bg-gray-200"
+        {...props}
+    >
+        <Eye size={16} />
+    </Link>
+);
+
 const Links = {
     LinkCreate,
     LinkEdit,
     LinkAssign,
     LinkIconCreate,
     LinkIconEdit,
-    LinkIconAssign
+    LinkIconAssign,
+    LinkIconView
 };
 
 export default Links;

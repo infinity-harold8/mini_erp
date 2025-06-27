@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Inventory;
 
+use Carbon\Carbon;
 use App\Models\Size;
 use App\Models\Color;
 use App\Models\Product;
@@ -124,12 +125,12 @@ class ProductsController extends Controller
     }
 
     public function show($id){
-        $product = Product::with(['colors', 'sizes:id,size_name', 'heelHeights', 'categories', 'sizes.sizeValues'])->find($id);
-        $product_variants = ProductVariant::with(['stockLevels', 'stockMovements'])->where('product_id', '=',$id)->get();
+        $product = Product::with(['colors', 'sizes:id,size_name', 'heelHeights', 'categories', 'sizes.sizeValues', 'variants', 'variants.stockLevels', 'variants.stockMovements'])->find($id);
+        // $product_variants = ProductVariant::with(['stockLevels', 'stockMovements'])->where('product_id', '=',$id)->get();
         // dd(ProductVariant::where('product_id', '=',$id)->get());
         return inertia('Inventory/Products/View/Page', [
             'product' => $product,
-            'product_variants' => $product_variants ? $product_variants : [],
+            // 'product_variants' => $product_variants ? $product_variants : [],
             'colors' => Color::all(),
             'sizes' => Size::all(),
             'size_values' => SizeValues::all(),
@@ -147,9 +148,43 @@ class ProductsController extends Controller
             'size_values',
             'heelHeights',
             'categories',
-            'stockMovements.warehouse' // Ensure warehouse details are included
+            'stockLevels',
+            'stockMovements' // Ensure warehouse details are included
         ])
-        ->first(); // Using first() to return a single product variant
+        ->withSum(['stockLevels as qty_in' => function ($query) {
+            $query->whereIn('movement_type', ['in-stock', 'return']);
+        }], 'quantity')
+        ->withSum(['stockLevels as qty_out' => function ($query) {
+            $query->whereIn('movement_type', ['sold', 'repair']);
+        }], 'quantity')
+        ->withSum(['stockMovements as total_purchased' => function ($query) {
+            $query->where('movement_type', 'purchase');
+        }], 'quantity')
+        ->withSum(['stockMovements as total_sold' => function ($query) {
+            $query->where('movement_type', 'sale');
+        }], 'quantity')
+        ->withSum(['stockMovements as total_transfer_in' => function ($query) {
+            $query->where('movement_type', 'transfer_in');
+        }], 'quantity')
+        ->withSum(['stockMovements as total_transfer_out' => function ($query) {
+            $query->where('movement_type', 'transfer_in');
+        }], 'quantity')
+        ->withSum(['stockMovements as total_return' => function ($query) {
+            $query->where('movement_type', 'return');
+        }], 'quantity')
+        ->withSum(['stockMovements as total_replacement' => function ($query) {
+            $query->where('movement_type', 'replacement');
+        }], 'quantity')
+        ->withSum(['stockMovements as total_adjustment' => function ($query) {
+            $query->where('movement_type', 'adjustment');
+        }], 'quantity')
+        ->withSum(['stockMovements as total_correction' => function ($query) {
+            $query->where('movement_type', 'correction');
+        }], 'quantity')
+        ->withSum(['stockMovements as total_repair' => function ($query) {
+            $query->where('movement_type', 'repair');
+        }], 'quantity')
+        ->find($id); // Using first() to return a single product variant
         
         $stockPerWarehouse = StockMovements::with([
             'warehouse',
@@ -190,7 +225,7 @@ class ProductsController extends Controller
             // dd($stockPerWarehouse);
         return inertia('Inventory/Products/Variants/Page', [
             'product_variant' => $product,
-            'stock_per_warehouse' => $stockPerWarehouse,
+            'stock_per_warehouse' => $stockPerWarehouse
         ]);
     }
     
@@ -229,8 +264,12 @@ class ProductsController extends Controller
     }
 
     public function store_variants(Request $request){
+        // dd($request);
         DB::transaction(function () use ($request) {
-            $ids = collect($request->product_variants)
+            
+            if(empty($request->new_variants)) return back()->with('error', 'No variants to create.');
+            
+            $ids = collect($request->new_variants)
                 ->map(fn ($data) => ProductVariant::create($data)->id)   // returns Illuminate\Support\Collection
                 ->all();         
             $generatedBarcodeValues = $this->generateBarcode($ids);
@@ -245,6 +284,45 @@ class ProductsController extends Controller
         });
         
         return redirect()->route('products.index')->with('success', 'Product updated successfully!');
+    }
+
+    public function update_variants(Request $request){
+        $request->validate([
+            'updated_variants.*.id' => ['required', 'exists:product_variants,id'],
+            // 'update_variants.*.sku' => ['sometimes', 'required', 'string'],
+            // 'update_variants.*.unit_price' => ['sometimes', 'required', 'numeric'],
+            // 'update_variants.*.cost' => ['sometimes', 'required', 'numeric'],
+        ]);
+
+        DB::transaction(function() use ($request){
+            
+            if(empty($request->updated_variants)) return back()->with('error', 'No variants to update.');
+
+            foreach($request->updated_variants as $variant){
+                $product_variant = ProductVariant::find($variant['id']);
+                // dd($product_variant->sku);
+                $updateData = [];
+                if($product_variant->sku != $variant['sku']){
+                    $updateData['sku'] = $variant['sku'];
+                }
+                if($product_variant->unit_price != $variant['unit_price']){
+                    $updateData['unit_price'] = $variant['unit_price'];
+                }
+                if($product_variant->cost != $variant['cost']){
+                    $updateData['cost'] = $variant['cost'];
+                }
+
+                if(!empty($updateData)){
+                    // dd($updateData);
+                    $product_variant->update($updateData);
+                }
+                
+            }
+            
+        });
+
+        return back()->with('success', 'Successfully updated variants.');
+
     }
 
     public function destroy_variant(string $id){
