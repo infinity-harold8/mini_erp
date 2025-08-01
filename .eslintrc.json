@@ -17,11 +17,18 @@
         "react/react-in-jsx-scope": "off",
         "react/prop-types": "off",
         "react/no-unescaped-entities": "off",
-        "no-undef": "off"
+        "no-undef": "off",
+            "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true
+      }
+    ]
     },
     "settings": {
         "react": {
             "version": "detect"
         }
-    }
+    },
+    "plugins": ["react"],
 }

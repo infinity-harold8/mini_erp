@@ -40,7 +40,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
         console.log(data.new_variants);
         // console.log(data);
 
-        // post('/inventory/products/variants');
+        post('/inventory/products/variants');
     };
 
     const [variants, setVariants] = useState([]);
@@ -140,15 +140,15 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                 </h2>
             }
         >
-        <div className="container mx-auto p-6">
-            <div className="pb-12 pt-4">
-                <div className="mx-auto max-w-full sm:px-1 lg:px-2">
-                    <div className="overflow-hidden bg-white shadow-md rounded-lg">
+        <div className="container p-6 mx-auto">
+            <div className="pt-4 pb-12">
+                <div className="max-w-full mx-auto sm:px-1 lg:px-2">
+                    <div className="overflow-hidden bg-white rounded-lg shadow-md">
                         <div className="p-6">
-                            <h1 className="text-2xl font-bold text-gray-800 mb-4">Product Details</h1>
+                            <h1 className="mb-4 text-2xl font-bold text-gray-800">Product Details</h1>
 
                             {/* Product Information */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 {/* Product Name */}
                                 <div>
                                     <h2 className="text-lg font-semibold text-gray-700">Product Name</h2>
@@ -179,13 +179,13 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                             <hr className="my-6 border-gray-200" />
 
                             {/* Product Attributes */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 {/* Colors */}
                                 <div>
                                     <h2 className="text-lg font-semibold text-gray-700">Colors</h2>
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         {data.colors.map((color) => (
-                                            <span key={color.id} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
+                                            <span key={color.id} className="px-3 py-1 text-gray-700 bg-gray-200 rounded-md">
                                                 {color.color_name}
                                             </span>
                                         ))}
@@ -197,7 +197,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                     <h2 className="text-lg font-semibold text-gray-700">Sizes</h2>
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         {data.sizes.map((size) => (
-                                            <span key={size.id} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
+                                            <span key={size.id} className="px-3 py-1 text-gray-700 bg-gray-200 rounded-md">
                                                 {size.size_name}
                                             </span>
                                         ))}
@@ -209,7 +209,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                     <h2 className="text-lg font-semibold text-gray-700">Heel Heights</h2>
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         {data.heel_heights.map((heel) => (
-                                            <span key={heel.id} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
+                                            <span key={heel.id} className="px-3 py-1 text-gray-700 bg-gray-200 rounded-md">
                                                 {heel.value}
                                             </span>
                                         ))}
@@ -221,7 +221,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                     <h2 className="text-lg font-semibold text-gray-700">Category</h2>
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         {data.categories.map((category) => (
-                                            <span key={category.id} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
+                                            <span key={category.id} className="px-3 py-1 text-gray-700 bg-gray-200 rounded-md">
                                                 {category.category_name}
                                             </span>
                                         ))}
@@ -237,7 +237,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                 <button
                                     type="button"
                                     onClick={(e) => generateVariants(e)}
-                                    className="bg-green-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-green-600 transition"
+                                    className="px-6 py-2 font-semibold text-white transition bg-green-500 rounded-lg shadow-md hover:bg-green-600"
                                 >
                                     Generate Variants
                                 </button>
@@ -249,43 +249,43 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
 
             
             {
-                data.new_variants && <div className="grid grid-cols-12 gap-4 items-end bg-gray-50 p-4 rounded-xl shadow">
+                data.new_variants && <div className="grid items-end grid-cols-12 gap-4 p-4 shadow bg-gray-50 rounded-xl">
                     <div className="col-span-12 md:col-span-3">
-                        <label className="block text-sm mb-1 font-medium text-gray-700">Batch SKU</label>
+                        <label className="block mb-1 text-sm font-medium text-gray-700">Batch SKU</label>
                         <input
                             type="text"
                             value={batchSku}
                             onChange={e => setBatchSku(e.target.value)}
                             placeholder="e.g. ABC‑123"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring focus:ring-purple-300 focus:outline-none"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-purple-300 focus:outline-none"
                         />
                     </div>
                     <div className="col-span-6 md:col-span-3">
-                        <label className="block text-sm mb-1 font-medium text-gray-700">Batch SRP</label>
+                        <label className="block mb-1 text-sm font-medium text-gray-700">Batch SRP</label>
                         <input
                             type="number"
                             value={batchUnitPrice}
                             onChange={e => setBatchUnitPrice(e.target.value)}
                             placeholder="e.g. 999.00"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring focus:ring-purple-300 focus:outline-none"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-purple-300 focus:outline-none"
                         />
                     </div>
                     <div className="col-span-6 md:col-span-3">
-                        <label className="block text-sm mb-1 font-medium text-gray-700">Batch Cost</label>
+                        <label className="block mb-1 text-sm font-medium text-gray-700">Batch Cost</label>
                         <input
                             type="number"
                             value={batchCost}
                             onChange={e => setBatchCost(e.target.value)}
                             placeholder="e.g. 750.00"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring focus:ring-purple-300 focus:outline-none"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-purple-300 focus:outline-none"
                         />
                     </div>
 
-                    <div className="col-span-12 md:col-span-3 flex md:justify-end">
+                    <div className="flex col-span-12 md:col-span-3 md:justify-end">
                         <button
                             type="button"
                             onClick={handleApplyBatch}
-                            className="w-full md:w-auto bg-purple-600 text-white font-semibold px-6 py-2 rounded-lg shadow hover:bg-purple-700 transition"
+                            className="w-full px-6 py-2 font-semibold text-white transition bg-purple-600 rounded-lg shadow md:w-auto hover:bg-purple-700"
                         >
                             Apply to All
                         </button>
@@ -294,10 +294,10 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
             }
             
             <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Product Variants</h2>
+                <h2 className="mb-4 text-xl font-semibold text-gray-800">Product Variants</h2>
                 <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm text-left text-gray-500 bg-gray-50 border border-gray-200 rounded-lg shadow">
-                        <thead className="bg-gray-100 text-gray-700">
+                    <table className="min-w-full text-sm text-left text-gray-500 border border-gray-200 rounded-lg shadow bg-gray-50">
+                        <thead className="text-gray-700 bg-gray-100">
                             <tr>
                                 <th className="px-4 py-3 font-medium">Color</th>
                                 <th className="px-4 py-3 font-medium">Heel Height</th>
@@ -313,7 +313,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                 const heelHeightName = heel_heights.find(height => height.id === variant.heel_height_id)?.value || 'Unknown';
                                 const sizeValue = size_values.find(value => value.id === variant.size_value_id)?.size_values || 'Unknown';    
                                 return (
-                                    <tr key={index} className="hover:bg-gray-50 transition">
+                                    <tr key={index} className="transition hover:bg-gray-50">
                                         <td className="px-4 py-2 text-gray-900">{colorName}</td>
                                         <td className="px-4 py-2 text-gray-900">{heelHeightName}</td>
                                         <td className="px-4 py-2 text-gray-900">{sizeValue}</td>
@@ -327,7 +327,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                                     setData('new_variants', updatedVariants);
                                                 }}
                                                 placeholder="Enter SKU"
-                                                className="w-full border border-gray-300 rounded-md px-3 py-1 focus:ring focus:ring-green-300 focus:outline-none transition"
+                                                className="w-full px-3 py-1 transition border border-gray-300 rounded-md focus:ring focus:ring-green-300 focus:outline-none"
                                             />
                                         </td>
                                         <td className="px-4 py-2">
@@ -340,7 +340,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                                     setData('new_variants', updatedVariants);
                                                 }}
                                                 placeholder="Enter Unit Price"
-                                                className="w-full border border-gray-300 rounded-md px-3 py-1 focus:ring focus:ring-green-300 focus:outline-none transition"
+                                                className="w-full px-3 py-1 transition border border-gray-300 rounded-md focus:ring focus:ring-green-300 focus:outline-none"
                                             />
                                         </td>
                                         <td className="px-4 py-2">
@@ -353,7 +353,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                                     setData('new_variants', updatedVariants);
                                                 }}
                                                 placeholder="Enter Unit Cost"
-                                                className="w-full border border-gray-300 rounded-md px-3 py-1 focus:ring focus:ring-green-300 focus:outline-none transition"
+                                                className="w-full px-3 py-1 transition border border-gray-300 rounded-md focus:ring focus:ring-green-300 focus:outline-none"
                                             />
                                         </td>
                                         <td className="px-4 py-2">
@@ -374,7 +374,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                         <button
                             type="button"
                             onClick={(e) => handleSubmit(e)}
-                            className="bg-green-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-green-600 transition"
+                            className="px-6 py-2 font-semibold text-white transition bg-green-500 rounded-lg shadow-md hover:bg-green-600"
                         >
                             Save Variants
                         </button>
@@ -384,10 +384,10 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
             </div>
 
             <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Existing Product Variants</h2>
+                <h2 className="mb-4 text-xl font-semibold text-gray-800">Existing Product Variants</h2>
                 <div className="overflow-x-auto">
-                    <table className="min-w-full text-xs text-left text-gray-500 bg-gray-50 border border-gray-200 rounded-lg shadow">
-                        <thead className="bg-gray-100 text-gray-700">
+                    <table className="min-w-full text-xs text-left text-gray-500 border border-gray-200 rounded-lg shadow bg-gray-50">
+                        <thead className="text-gray-700 bg-gray-100">
                             <tr>
                                 <th className="px-4 py-3 font-medium">ID</th>
                                 <th className="px-4 py-3 font-medium">Color</th>
@@ -405,7 +405,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                 const heelHeightName = heel_heights.find(height => height.id === variant.heel_height_id)?.value || 'Unknown';
                                 const size_value = size_values.find(values => values.id === variant.size_value_id)?.size_values || 'Unknown';
                                 return (
-                                    <tr key={index} className="hover:bg-gray-50 transition">
+                                    <tr key={index} className="transition hover:bg-gray-50">
                                         <td className="px-4 py-2 text-gray-900">{variant.id}</td>
                                         <td className="px-4 py-2 text-gray-900">{colorName}</td>
                                         <td className="px-4 py-2 text-gray-900">{heelHeightName}</td>
@@ -414,7 +414,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                             {
                                                 editableRows[variant.id] && data.product_variants[index].stock_levels.length === 0  && data.product_variants[index].stock_levels.length === 0 ? (
                                                     <TextInput
-                                                        className="text-xs p-1 hover:border-purple-500 w-fit"
+                                                        className="p-1 text-xs hover:border-purple-500 w-fit"
                                                         value={data.product_variants[index].sku}
                                                         onChange={(e) => {
                                                             const value = e.target.value;
@@ -449,7 +449,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                                                                                                 {
                                             editableRows[variant.id] ? (
                                                     <TextInput
-                                                        className="text-xs p-1 hover:border-purple-500 w-fit"
+                                                        className="p-1 text-xs hover:border-purple-500 w-fit"
                                                         value={data.product_variants[index].unit_price}
                                                         size={8}
                                                         onChange={(e) => {
@@ -483,7 +483,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                             {
                                                 editableRows[variant.id] ? (
                                                     <TextInput
-                                                        className="text-xs p-1 hover:border-purple-500 w-fit"
+                                                        className="p-1 text-xs hover:border-purple-500 w-fit"
                                                         value={data.product_variants[index].cost}
                                                         size={8}
                                                         onChange={(e) => {
@@ -513,7 +513,7 @@ const ViewProduct = ({ colors, sizes, size_values, heel_heights, categories }) =
                                                 ) : (variant.cost)
                                             }
                                         </td>
-                                        <td className="px-4 py-2 text-gray-900 space-x-2">
+                                        <td className="px-4 py-2 space-x-2 text-gray-900">
 
                                             <Buttons.IconUpdateButton
                                                 key={index}
