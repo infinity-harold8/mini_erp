@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Textarea } from '@headlessui/react';
+import ActionsDropdown from '@/Components/ActionsDropdown';
 
 const SalesOrderView = ({ sales_order, user}) => {
     // const { auth } = usePage().props;
@@ -114,70 +115,48 @@ const SalesOrderView = ({ sales_order, user}) => {
         >
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden rounded-lg bg-white shadow-md">
+                    <div className="overflow-hidden bg-white rounded-lg shadow-md">
                         <div className="p-6">
-                            <div className="container mx-auto p-6">
-                                <div>
-                                    <select
-                                        value={sales_order?.status}
-                                        // onChange={(e) => updateOrderStatus(e.target.value)}
-                                        className="rounded-lg bg-green-500 px-5 py-2 text-white shadow transition hover:bg-green-600"
-                                    >
-                                        {statuses.map((status) => (
-                                            <option
-                                                key={status}
-                                                value={status}
-                                                onClick={(e) =>
-                                                    updateOrderStatus(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                disabled={sales_order?.status === status}
-                                            >
-                                                {status
-                                                    .charAt(0)
-                                                    .toUpperCase() +
-                                                    status.slice(1)}
-                                            </option>
-                                        ))}
-                                    </select>
+                            <div className="container p-6 mx-auto">
+                                <div className="flex items-end justify-end w-full">
+                                    <ActionsDropdown states={statuses} onSelectStatus={(state) => updateOrderStatus(state)} />
                                 </div>
-                                <div className="flex w-full flex-col items-center justify-center p-10">
+                                <div className="flex flex-col items-center justify-center w-full p-10">
                                     <div className="grid w-full grid-cols-2 border-b-2">
-                                        <h1 className="w-full text-left text-3xl font-bold">
+                                        <h1 className="w-full text-3xl font-bold text-left">
                                             Order Date: {formatDate(sales_order.created_at)}
                                         </h1>
-                                        <h1 className="w-full text-right text-3xl font-bold">
+                                        <h1 className="w-full text-3xl font-bold text-right">
                                             Status: {sales_order.status.toUpperCase()}
                                         </h1>
                                     </div>
 
-                                    <div className="grid grid-cols-2 w-full">
-                                        <h1 className="text-2xl font-bold w-full text-left">Courier: <u>{sales_order.courier.name.toUpperCase()}</u></h1>
-                                        <h1 className="text-2xl font-bold w-full text-right">Packaging Type: <u>{sales_order.packaging_type?.packaging_name.toUpperCase()}</u></h1>
+                                    <div className="grid w-full grid-cols-2">
+                                        <h1 className="w-full text-2xl font-bold text-left">Courier: <u>{sales_order.courier.name.toUpperCase()}</u></h1>
+                                        <h1 className="w-full text-2xl font-bold text-right">Packaging Type: <u>{sales_order.packaging_type?.packaging_name.toUpperCase()}</u></h1>
                                     </div>
-                                    <div className="grid grid-cols-2 w-full">
-                                        <h1 className="text-2xl font-bold w-full text-left">Shoulder By: <u>{sales_order.shoulder_by.toUpperCase()}</u></h1>
+                                    <div className="grid w-full grid-cols-2">
+                                        <h1 className="w-full text-2xl font-bold text-left">Shoulder By: <u>{sales_order.shoulder_by.toUpperCase()}</u></h1>
                                     </div>
 
-                                    <div className="my-4 w-full">
+                                    <div className="w-full my-4">
                                         <h2 className="mb-2 text-xl font-semibold">
                                             Order Items
                                         </h2>
                                         <table className="min-w-full border border-gray-300">
                                             <thead className="bg-gray-100">
                                                 <tr>
-                                                    <th className="border px-4 py-2 text-left">
+                                                    <th className="px-4 py-2 text-left border">
                                                         SKU
                                                     </th>
-                                                    {/* <th className="border px-4 py-2 text-left">Description</th> */}
-                                                    <th className="border px-4 py-2 text-right">
+                                                    {/* <th className="px-4 py-2 text-left border">Description</th> */}
+                                                    <th className="px-4 py-2 text-right border">
                                                         Quantity
                                                     </th>
-                                                    <th className="border px-4 py-2 text-right">
+                                                    <th className="px-4 py-2 text-right border">
                                                         Unit Price
                                                     </th>
-                                                    <th className="border px-4 py-2 text-right">
+                                                    <th className="px-4 py-2 text-right border">
                                                         Total Price
                                                     </th>
                                                 </tr>
@@ -188,22 +167,22 @@ const SalesOrderView = ({ sales_order, user}) => {
                                                     sales_order.items.map(
                                                         (item) => (
                                                             <tr key={item.id}>
-                                                                <td className="border px-4 py-2">
+                                                                <td className="px-4 py-2 border">
                                                                     {
                                                                         item
                                                                             .product_variant
                                                                             .sku
                                                                     }
                                                                 </td>
-                                                                {/* <td className="border px-4 py-2">
+                                                                {/* <td className="px-4 py-2 border">
                                                                 {item.product_variant}
                                                             </td> */}
-                                                                <td className="border px-4 py-2 text-right">
+                                                                <td className="px-4 py-2 text-right border">
                                                                     {
                                                                         item.quantity
                                                                     }
                                                                 </td>
-                                                                <td className="border px-4 py-2 text-right">
+                                                                <td className="px-4 py-2 text-right border">
                                                                     ₱
                                                                     {parseFloat(
                                                                         item.unit_price,
@@ -211,7 +190,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                                                         2,
                                                                     )}
                                                                 </td>
-                                                                <td className="border px-4 py-2 text-right">
+                                                                <td className="px-4 py-2 text-right border">
                                                                     ₱
                                                                     {parseFloat(
                                                                         item.total_price,
@@ -225,7 +204,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                                 ) : (
                                                     <tr>
                                                         <td
-                                                            className="border px-4 py-2 text-center"
+                                                            className="px-4 py-2 text-center border"
                                                             colSpan="5"
                                                         >
                                                             No items found
@@ -237,32 +216,32 @@ const SalesOrderView = ({ sales_order, user}) => {
                                     </div>
 
                                     <div className="w-full mb-4">
-                                        <p className="text-l font-bold w-full">Packaging Type Description: <u>{sales_order.packaging_type?.description}</u></p>
+                                        <p className="w-full font-bold text-l">Packaging Type Description: <u>{sales_order.packaging_type?.description}</u></p>
                                     </div>
 
-                                    <div className="mb-4 w-full">
+                                    <div className="w-full mb-4">
                                         <h2 className="mb-2 text-xl font-semibold">
                                             Payment Information
                                         </h2>
                                         <table className="min-w-full border border-gray-300">
                                             <thead className="bg-gray-100">
                                                 <tr>
-                                                    <th className="border px-4 py-2 text-left">
+                                                    <th className="px-4 py-2 text-left border">
                                                         Payment Method
                                                     </th>
-                                                    <th className="border px-4 py-2 text-left">
+                                                    <th className="px-4 py-2 text-left border">
                                                         Amount Paid
                                                     </th>
-                                                    <th className="border px-4 py-2 text-left">
+                                                    <th className="px-4 py-2 text-left border">
                                                         Change Due
                                                     </th>
-                                                    <th className="border px-4 py-2 text-right">
+                                                    <th className="px-4 py-2 text-right border">
                                                         Excess
                                                     </th>
-                                                    <th className="border px-4 py-2 text-right">
+                                                    <th className="px-4 py-2 text-right border">
                                                         Balance
                                                     </th>
-                                                    <th className="border px-4 py-2 text-right">
+                                                    <th className="px-4 py-2 text-right border">
                                                         Date
                                                     </th>
                                                 </tr>
@@ -276,38 +255,38 @@ const SalesOrderView = ({ sales_order, user}) => {
                                                             <tr
                                                                 key={payment.id}
                                                             >
-                                                                <td className="border px-4 py-2">
+                                                                <td className="px-4 py-2 border">
                                                                     {
                                                                         payment
                                                                             .payment_method
                                                                             .name
                                                                     }
                                                                 </td>
-                                                                <td className="border px-4 py-2">
+                                                                <td className="px-4 py-2 border">
                                                                     ₱
                                                                     {
                                                                         payment.amount_paid
                                                                     }
                                                                 </td>
-                                                                <td className="border px-4 py-2 text-right">
+                                                                <td className="px-4 py-2 text-right border">
                                                                     ₱
                                                                     {
                                                                         payment.change_due
                                                                     }
                                                                 </td>
-                                                                <td className="border px-4 py-2 text-right">
+                                                                <td className="px-4 py-2 text-right border">
                                                                     ₱
                                                                     {
                                                                         payment.excess_amount
                                                                     }
                                                                 </td>
-                                                                <td className="border px-4 py-2 text-right">
+                                                                <td className="px-4 py-2 text-right border">
                                                                     ₱
                                                                     {
                                                                         payment.remaining_balance
                                                                     }
                                                                 </td>
-                                                                <td className="border px-4 py-2 text-right">
+                                                                <td className="px-4 py-2 text-right border">
                                                                     {formatDate(
                                                                         payment.created_at,
                                                                     )}
@@ -318,7 +297,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                                 ) : (
                                                     <tr>
                                                         <td
-                                                            className="border px-4 py-2 text-center"
+                                                            className="px-4 py-2 text-center border"
                                                             colSpan="5"
                                                         >
                                                             No items found
@@ -385,7 +364,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                             </p>
                                         )}
                                     </div>
-                                    <div className="flex w-full flex-col items-end justify-end border-t pt-4">
+                                    <div className="flex flex-col items-end justify-end w-full pt-4 border-t">
                                         <h2 className="mb-2 text-xl font-semibold">
                                             Order Summary
                                         </h2>
@@ -429,7 +408,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                         </p>
                                     </div>
 
-                                    <div className="w-full border-t pt-4">
+                                    <div className="w-full pt-4 border-t">
                                         <h2 className="mb-2 text-xl font-semibold">
                                             Remarks/Note:
                                         </h2>
@@ -442,9 +421,9 @@ const SalesOrderView = ({ sales_order, user}) => {
                                 </div>
 
                                 <div className="py-12">
-                                    <div className="mx-auto max-w-4xl rounded-lg bg-white p-8 shadow-md">
+                                    <div className="max-w-4xl p-8 mx-auto bg-white rounded-lg shadow-md">
                                         {/* Header Section */}
-                                        <div className="mb-8 border-b pb-4">
+                                        <div className="pb-4 mb-8 border-b">
                                             <h1 className="mb-2 text-3xl font-bold">
                                                 Sales Order
                                             </h1>
@@ -464,7 +443,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                         </div>
 
                                         {/* Customer Information */}
-                                        <div className="mb-8 border-b pb-4">
+                                        <div className="pb-4 mb-8 border-b">
                                             <h2 className="mb-2 text-xl font-semibold">
                                                 Customer Information
                                             </h2>
@@ -532,17 +511,17 @@ const SalesOrderView = ({ sales_order, user}) => {
                                             <table className="min-w-full border border-gray-300">
                                                 <thead className="bg-gray-100">
                                                     <tr>
-                                                        <th className="border px-4 py-2 text-left">
+                                                        <th className="px-4 py-2 text-left border">
                                                             SKU
                                                         </th>
-                                                        {/* <th className="border px-4 py-2 text-left">Description</th> */}
-                                                        <th className="border px-4 py-2 text-right">
+                                                        {/* <th className="px-4 py-2 text-left border">Description</th> */}
+                                                        <th className="px-4 py-2 text-right border">
                                                             Quantity
                                                         </th>
-                                                        <th className="border px-4 py-2 text-right">
+                                                        <th className="px-4 py-2 text-right border">
                                                             Unit Price
                                                         </th>
-                                                        <th className="border px-4 py-2 text-right">
+                                                        <th className="px-4 py-2 text-right border">
                                                             Total Price
                                                         </th>
                                                     </tr>
@@ -558,22 +537,22 @@ const SalesOrderView = ({ sales_order, user}) => {
                                                                         item.id
                                                                     }
                                                                 >
-                                                                    <td className="border px-4 py-2">
+                                                                    <td className="px-4 py-2 border">
                                                                         {
                                                                             item
                                                                                 .product_variant
                                                                                 .sku
                                                                         }
                                                                     </td>
-                                                                    {/* <td className="border px-4 py-2">
+                                                                    {/* <td className="px-4 py-2 border">
                                                                 {item.product_variant}
                                                             </td> */}
-                                                                    <td className="border px-4 py-2 text-right">
+                                                                    <td className="px-4 py-2 text-right border">
                                                                         {
                                                                             item.quantity
                                                                         }
                                                                     </td>
-                                                                    <td className="border px-4 py-2 text-right">
+                                                                    <td className="px-4 py-2 text-right border">
                                                                         ₱
                                                                         {parseFloat(
                                                                             item.unit_price,
@@ -581,7 +560,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                                                             2,
                                                                         )}
                                                                     </td>
-                                                                    <td className="border px-4 py-2 text-right">
+                                                                    <td className="px-4 py-2 text-right border">
                                                                         ₱
                                                                         {parseFloat(
                                                                             item.total_price,
@@ -595,7 +574,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                                     ) : (
                                                         <tr>
                                                             <td
-                                                                className="border px-4 py-2 text-center"
+                                                                className="px-4 py-2 text-center border"
                                                                 colSpan="5"
                                                             >
                                                                 No items found
@@ -607,7 +586,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                         </div>
 
                                         {/* Payment Information */}
-                                        <div className="mb-8 border-t pt-4">
+                                        <div className="pt-4 mb-8 border-t">
                                             <h2 className="mb-2 text-xl font-semibold">
                                                 Payment Information
                                             </h2>
@@ -662,7 +641,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                         </div>
 
                                         {/* Order Summary */}
-                                        <div className="border-t pt-4">
+                                        <div className="pt-4 border-t">
                                             <h2 className="mb-2 text-xl font-semibold">
                                                 Order Summary
                                             </h2>
